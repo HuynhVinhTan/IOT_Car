@@ -1,0 +1,103 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <list>
+          <option value="aiohappyeyeballs" />
+          <option value="aiohttp" />
+          <option value="aiosignal" />
+          <option value="aiosmtplib" />
+          <option value="alembic" />
+          <option value="annotated-doc" />
+          <option value="annotated-types" />
+          <option value="anyio" />
+          <option value="asyncpg" />
+          <option value="attrs" />
+          <option value="babel" />
+          <option value="blinker" />
+          <option value="boto3" />
+          <option value="botocore" />
+          <option value="certifi" />
+          <option value="cffi" />
+          <option value="charset-normalizer" />
+          <option value="click" />
+          <option value="colorama" />
+          <option value="cryptography" />
+          <option value="dnspython" />
+          <option value="ecdsa" />
+          <option value="email-validator" />
+          <option value="fastapi" />
+          <option value="fastapi-babel" />
+          <option value="fastapi-mail" />
+          <option value="fastapi-utils" />
+          <option value="frozenlist" />
+          <option value="googleapis-common-protos" />
+          <option value="greenlet" />
+          <option value="grpcio" />
+          <option value="grpcio-status" />
+          <option value="grpcio-tools" />
+          <option value="h11" />
+          <option value="httpcore" />
+          <option value="httptools" />
+          <option value="httpx" />
+          <option value="idna" />
+          <option value="jinja2" />
+          <option value="jmespath" />
+          <option value="mako" />
+          <option value="markupsafe" />
+          <option value="multidict" />
+          <option value="passlib" />
+          <option value="pillow" />
+          <option value="propcache" />
+          <option value="protobuf" />
+          <option value="psutil" />
+          <option value="psycopg2-binary" />
+          <option value="pyasn1" />
+          <option value="pycparser" />
+          <option value="pycryptodome" />
+          <option value="pydantic" />
+          <option value="pydantic-core" />
+          <option value="pydantic-settings" />
+          <option value="python-dateutil" />
+          <option value="python-dotenv" />
+          <option value="python-jose" />
+          <option value="python-multipart" />
+          <option value="pyyaml" />
+          <option value="qrcode" />
+          <option value="regex" />
+          <option value="requests" />
+          <option value="rsa" />
+          <option value="s3transfer" />
+          <option value="six" />
+          <option value="sqlalchemy" />
+          <option value="starlette" />
+          <option value="typing-extensions" />
+          <option value="typing-inspection" />
+          <option value="urllib3" />
+          <option value="uvicorn" />
+          <option value="watchfiles" />
+          <option value="websockets" />
+          <option value="yarl" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8NamingInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="N803" />
+          <option value="N806" />
+          <option value="N802" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="int.*" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

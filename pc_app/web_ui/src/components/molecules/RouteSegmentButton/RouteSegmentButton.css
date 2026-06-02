@@ -1,0 +1,61 @@
+.route-segment-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 120px;
+}
+
+.route-segment-button:hover:not(:disabled) {
+  border-color: var(--brand-primary);
+  background: var(--bg-surface-hover);
+}
+
+.route-segment-button.selected {
+  border-color: var(--brand-primary);
+  background: rgba(0, 120, 212, 0.1);
+  font-weight: bold;
+}
+
+.route-segment-button.current {
+  border-left: 4px solid var(--status-info);
+}
+
+.route-segment-button.blocked {
+  opacity: 0.6;
+  cursor: not-allowed;
+  border-color: var(--status-error);
+}
+
+.route-segment-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.segment-label {
+  font-family: var(--font-mono);
+}
+
+.segment-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  margin-left: 8px;
+}
+
+.current-badge {
+  background: var(--status-info);
+  color: white;
+}
+
+.blocked-badge {
+  background: var(--status-error);
+  color: white;
+}
