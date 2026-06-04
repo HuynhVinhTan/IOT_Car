@@ -3,7 +3,9 @@ from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.schemas.face import FaceTarget as FaceTargetSchema, FaceTargetCreate, FaceStatus, FaceVerifyResponse
+from app.schemas.vision import FaceRecognitionResult
 from app.services.face_registry_service import FaceRegistryService
+from app.services.face_recognition_service import FaceRecognitionService
 
 router = APIRouter(prefix="/api/faces", tags=["Face Recognition"])
 
@@ -12,9 +14,11 @@ async def register_target(
     display_name: str = Form(...),
     notes: Optional[str] = Form(None),
     image: Optional[UploadFile] = File(None),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    request: Request = None
 ):
-    service = FaceRegistryService(db)
+    recognition_service = getattr(request.app.state, "face_recognition_service", None)
+    service = FaceRegistryService(db, recognition_service)
     req = FaceTargetCreate(display_name=display_name, notes=notes)
     target = await service.register_target(req)
     
@@ -29,8 +33,9 @@ async def register_target(
     )
 
 @router.get("/targets", response_model=List[FaceTargetSchema])
-async def list_targets(db: AsyncSession = Depends(get_db)):
-    service = FaceRegistryService(db)
+async def list_targets(db: AsyncSession = Depends(get_db), request: Request = None):
+    recognition_service = getattr(request.app.state, "face_recognition_service", None)
+    service = FaceRegistryService(db, recognition_service)
     targets = await service.list_targets()
     return [
         FaceTargetSchema(
@@ -42,15 +47,16 @@ async def list_targets(db: AsyncSession = Depends(get_db)):
     ]
 
 @router.delete("/targets/{target_id}")
-async def delete_target(target_id: str, db: AsyncSession = Depends(get_db)):
-    service = FaceRegistryService(db)
+async def delete_target(target_id: str, db: AsyncSession = Depends(get_db), request: Request = None):
+    recognition_service = getattr(request.app.state, "face_recognition_service", None)
+    service = FaceRegistryService(db, recognition_service)
     await service.delete_target(target_id)
     return {"status": "SUCCESS"}
 
 @router.get("/status", response_model=FaceStatus)
 async def get_face_status(request: Request, db: AsyncSession = Depends(get_db)):
     face_recognition_service = getattr(request.app.state, "face_recognition_service", None)
-    service = FaceRegistryService(db)
+    service = FaceRegistryService(db, face_recognition_service)
     reg_status = await service.get_status()
     provider_ready = (
         bool(face_recognition_service.is_ready())
@@ -68,3 +74,67 @@ async def get_face_status(request: Request, db: AsyncSession = Depends(get_db)):
             else "Face recognition provider is not initialized"
         )
     )
+
+@router.post("/targets/{target_id}/activate")
+async def activate_target(target_id: str, request: Request, db: AsyncSession = Depends(get_db)):
+    face_recognition_service: FaceRecognitionService = request.app.state.face_recognition_service
+    if not face_recognition_service:
+        raise HTTPException(status_code=503, detail="Face recognition service not initialized")
+    
+    from app.models.face import FaceTarget
+    from sqlalchemy import select, update
+    
+    # Verify target exists and is active
+    result = await db.execute(
+        select(FaceTarget).where(FaceTarget.id == target_id, FaceTarget.status == "ACTIVE")
+    )
+    target = result.scalars().first()
+    if not target:
+        raise HTTPException(status_code=404, detail="Target not found or not active")
+    
+    # Deactivate all other targets
+    await db.execute(
+        update(FaceTarget).where(FaceTarget.is_active_target == True).values(is_active_target=False)
+    )
+    # Activate the selected target
+    await db.execute(
+        update(FaceTarget).where(FaceTarget.id == target_id).values(is_active_target=True)
+    )
+    await db.commit()
+    
+    # Update in-memory
+    face_recognition_service.set_active_target(target_id)
+    
+    return {"status": "SUCCESS", "active_target_id": target_id, "display_name": target.display_name}
+
+@router.get("/active-target")
+async def get_active_target(request: Request):
+    face_recognition_service: FaceRecognitionService = request.app.state.face_recognition_service
+    if not face_recognition_service:
+        raise HTTPException(status_code=503, detail="Face recognition service not initialized")
+    
+    active_target_id = face_recognition_service.active_target_id
+    if not active_target_id:
+        return {"status": "NO_ACTIVE_TARGET", "active_target_id": None, "message": "No target activated"}
+    
+    return {"status": "SUCCESS", "active_target_id": str(active_target_id)}
+
+@router.post("/verify", response_model=FaceRecognitionResult)
+async def verify_face_direct(
+    request: Request,
+    file: UploadFile = File(...)
+):
+    """
+    MVP Endpoint: Direct face verification from a frame.
+    Requires FaceRecognitionService to be available in app.state.
+    """
+    face_recognition_service: FaceRecognitionService = request.app.state.face_recognition_service
+    if not face_recognition_service:
+        raise HTTPException(status_code=503, detail="Face recognition service not initialized")
+        
+    if not face_recognition_service.is_ready():
+        raise HTTPException(status_code=503, detail="Face recognition provider not ready")
+
+    image_bytes = await file.read()
+    result = await face_recognition_service.verify_frame_direct(image_bytes)
+    return result

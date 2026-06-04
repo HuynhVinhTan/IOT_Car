@@ -5,9 +5,13 @@
 
 #include "camera_pins.h"
 #include "camera_runtime_config.h"
-#include "secrets.h"
+
+#include "app_config.h"
+#include "config_portal.h"
+#include "serial_cli.h"
 
 WebSocketsClient backendWebSocket;
+AppConfig appConfig;
 
 bool wsConnected = false;
 unsigned long lastFrameAt = 0;
@@ -15,14 +19,11 @@ unsigned long lastHeartbeatAt = 0;
 unsigned long frameSentCount = 0;
 
 String buildCameraWsPath() {
-  return String("/ws/cameras/") + CAMERA_ID + "/publish?token=" + CAMERA_TOKEN;
+  return String("/ws/cameras/") + appConfig.cameraId + "/publish?token=" + appConfig.cameraToken;
 }
 
 void logWifiNetworks() {
-  if (!ENABLE_WIFI_SCAN_LOG) {
-    return;
-  }
-
+#if ENABLE_WIFI_SCAN_LOG == 1
   Serial.println("[WiFi] Scanning...");
   int count = WiFi.scanNetworks();
 
@@ -38,6 +39,7 @@ void logWifiNetworks() {
       WiFi.encryptionType(i)
     );
   }
+#endif
 }
 
 void setupWiFi() {
@@ -49,9 +51,9 @@ void setupWiFi() {
   logWifiNetworks();
 
   Serial.print("[WiFi] Connecting to ");
-  Serial.println(WIFI_SSID);
+  Serial.println(appConfig.wifiSsid);
 
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  WiFi.begin(appConfig.wifiSsid.c_str(), appConfig.wifiPassword.c_str());
 
   unsigned long startAt = millis();
 
@@ -103,7 +105,7 @@ bool setupCamera() {
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
   config.frame_size = CAMERA_FRAME_SIZE;
-  config.jpeg_quality = CAMERA_JPEG_QUALITY;
+  config.jpeg_quality = appConfig.jpegQuality;
 
   if (psramFound()) {
     Serial.println("[CAM] PSRAM found");
@@ -128,7 +130,7 @@ bool setupCamera() {
 
   if (sensor) {
     sensor->set_framesize(sensor, CAMERA_FRAME_SIZE);
-    sensor->set_quality(sensor, CAMERA_JPEG_QUALITY);
+    sensor->set_quality(sensor, appConfig.jpegQuality);
 
     sensor->set_brightness(sensor, 0);
     sensor->set_contrast(sensor, 0);
@@ -158,7 +160,7 @@ void sendHeartbeat() {
 
   String message = String("{") +
                    "\"type\":\"camera_heartbeat\"," +
-                   "\"camera_id\":\"" + CAMERA_ID + "\"," +
+                   "\"camera_id\":\"" + appConfig.cameraId + "\"," +
                    "\"frame_sent_count\":" + String(frameSentCount) + "," +
                    "\"free_heap\":" + String(ESP.getFreeHeap()) + "," +
                    "\"rssi\":" + String(WiFi.RSSI()) +
@@ -196,9 +198,11 @@ void publishFrame() {
   if (sent) {
     frameSentCount++;
 
-    if (ENABLE_FRAME_LOG && frameSentCount % FRAME_LOG_EVERY == 0) {
+#if ENABLE_FRAME_LOG == 1
+    if (frameSentCount % FRAME_LOG_EVERY == 0) {
       Serial.printf("[CAM] Frame sent #%lu, size=%u bytes\n", frameSentCount, frameBuffer->len);
     }
+#endif
   } else {
     Serial.printf("[CAM] Send failed, size=%u bytes\n", frameBuffer->len);
   }
@@ -220,11 +224,11 @@ void onBackendWebSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
       backendWebSocket.sendTXT(
         String("{") +
         "\"type\":\"camera_hello\"," +
-        "\"camera_id\":\"" + CAMERA_ID + "\"," +
+        "\"camera_id\":\"" + appConfig.cameraId + "\"," +
         "\"mode\":\"WS_PUBLISHER_ONLY\"," +
         "\"frame_size\":\"QVGA\"," +
-        "\"jpeg_quality\":" + String(CAMERA_JPEG_QUALITY) + "," +
-        "\"frame_interval_ms\":" + String(FRAME_INTERVAL_MS) +
+        "\"jpeg_quality\":" + String(appConfig.jpegQuality) + "," +
+        "\"frame_interval_ms\":" + String(appConfig.frameIntervalMs) +
         "}"
       );
       break;
@@ -249,18 +253,23 @@ void setupBackendWebSocket() {
 
   Serial.println("[WS] Setup");
   Serial.print("[WS] Host: ");
-  Serial.println(BACKEND_WS_HOST);
+  Serial.println(appConfig.backendHost);
   Serial.print("[WS] Port: ");
-  Serial.println(BACKEND_WS_PORT);
+  Serial.println(appConfig.backendPort);
   Serial.print("[WS] TLS: ");
-  Serial.println(BACKEND_WS_TLS ? "true" : "false");
+  Serial.println(appConfig.backendTls ? "true" : "false");
   Serial.print("[WS] Path: ");
-  Serial.println(path);
+  Serial.println(path); // Token is printed here? Wait! 
+  // Let's replace the token in the log to be safe:
+  String safePath = path;
+  int tokenIdx = safePath.indexOf("token=");
+  if (tokenIdx > 0) safePath = safePath.substring(0, tokenIdx + 6) + "******";
+  Serial.println(safePath);
 
-  if (BACKEND_WS_TLS) {
-    backendWebSocket.beginSSL(BACKEND_WS_HOST, BACKEND_WS_PORT, path.c_str());
+  if (appConfig.backendTls) {
+    backendWebSocket.beginSSL(appConfig.backendHost.c_str(), appConfig.backendPort, path.c_str());
   } else {
-    backendWebSocket.begin(BACKEND_WS_HOST, BACKEND_WS_PORT, path.c_str());
+    backendWebSocket.begin(appConfig.backendHost.c_str(), appConfig.backendPort, path.c_str());
   }
 
   backendWebSocket.onEvent(onBackendWebSocketEvent);
@@ -268,13 +277,38 @@ void setupBackendWebSocket() {
   backendWebSocket.enableHeartbeat(15000, 3000, 2);
 }
 
+bool isSetupButtonPressed() {
+  pinMode(SETUP_BUTTON_PIN, INPUT_PULLUP);
+  delay(10);
+  bool pressed = (digitalRead(SETUP_BUTTON_PIN) == LOW);
+  return pressed;
+}
+
 void setup() {
   Serial.begin(115200);
   delay(1000);
 
-  Serial.println();
-  Serial.println("Smart Car AI - ESP32-CAM WS Publisher");
-  Serial.println("CAMERA_MODE=WS_PUBLISHER_ONLY");
+  Serial.println("\nSmart Car AI - ESP32-CAM WS Publisher");
+  
+  bool setupPressed = isSetupButtonPressed();
+  
+  loadAppConfig(appConfig);
+  printSafeAppConfig(appConfig);
+
+  // If button is held during boot or config is invalid, launch portal
+  if (setupPressed || !appConfig.valid) {
+    if (setupPressed) Serial.println("Setup button pressed!");
+    else Serial.println("Config is missing/invalid.");
+    
+#if defined(ENABLE_CONFIG_PORTAL) && ENABLE_CONFIG_PORTAL == 1
+    startConfigPortal("SmartCar-Setup");
+#else
+    Serial.println("Config portal disabled in build! Halting.");
+    while (true) { delay(1000); }
+#endif
+  }
+
+  serialCliBegin(appConfig);
 
   setupWiFi();
 
@@ -289,6 +323,8 @@ void setup() {
 }
 
 void loop() {
+  serialCliTick(appConfig);
+
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println("[WiFi] Lost connection. Restarting...");
     delay(1000);
@@ -306,7 +342,7 @@ void loop() {
     sendHeartbeat();
   }
 
-  if (ENABLE_WS_CAMERA_PUBLISHER && wsConnected && now - lastFrameAt >= FRAME_INTERVAL_MS) {
+  if (ENABLE_WS_CAMERA_PUBLISHER && wsConnected && now - lastFrameAt >= appConfig.frameIntervalMs) {
     lastFrameAt = now;
     publishFrame();
   }

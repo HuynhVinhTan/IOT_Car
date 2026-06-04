@@ -19,3 +19,5 @@ doc_project/
 # Local environment secrets
 .env.*
 !.env.example
+migrations/
+.md

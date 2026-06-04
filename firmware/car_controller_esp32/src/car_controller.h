@@ -2,9 +2,21 @@
 
 #include <WiFi.h>
 #include <WebSocketsClient.h>
+#include "car_types.h"
+#include "engine.h"
+#include "distance_sensor_array.h"
+#include "cliff_sensor_array.h"
+#include "speed_sensor.h"
+#include "local_status_button.h"
+#include "battery_monitor.h"
+#include "lcd_display.h"
+#include "command_parser.h"
+#include "telemetry.h"
+#include "safety_guard.h"
 
 class CarController {
  public:
+  CarController();
   void begin();
   void update();
 
@@ -34,18 +46,17 @@ class CarController {
   CarTelemetry buildTelemetry(unsigned long nowMs) const;
   bool commandAllowedInEmergency(CommandType commandType) const;
 
-  Engine engine_;
-  DistanceSensorArray distanceSensorArray_;
-  CliffSensorArray cliffSensorArray_;
-  SpeedSensor speedSensor_;
-  CameraModule camera_;
-  LocalStatusButton localStatusButton_;
-  BatteryMonitor batteryMonitor_;
-  LcdDisplay lcdDisplay_;
-  CommandParser commandParser_;
-  TelemetryPublisher telemetryPublisher_;
-  SafetyGuard safetyGuard_;
-  WebSocketsClient webSocket_;
+  Engine* engine_;
+  DistanceSensorArray* distanceSensorArray_;
+  CliffSensorArray* cliffSensorArray_;
+  SpeedSensor* speedSensor_;
+  LocalStatusButton* localStatusButton_;
+  BatteryMonitor* batteryMonitor_;
+  LcdDisplay* lcdDisplay_;
+  CommandParser* commandParser_;
+  TelemetryPublisher* telemetryPublisher_;
+  SafetyGuard* safetyGuard_;
+  WebSocketsClient* webSocket_;
 
   DriveMode currentDriveMode_ = DriveMode::Idle;
   SafetyStatus latestSafetyStatus_;

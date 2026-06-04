@@ -4,42 +4,46 @@
 // Singleton pointer for callbacks
 CarController* g_carController = nullptr;
 
-void onTelemetryJson(const String& json) {
-    if (g_carController) {
-        // We'll call a method on g_carController to send via WebSocket
-        // But since we are in a callback, we need to be careful.
-        // CarController::webSocket is a member.
-    }
-}
+CarController::CarController() :
+    engine_(new Engine()),
+    distanceSensorArray_(new DistanceSensorArray()),
+    cliffSensorArray_(new CliffSensorArray()),
+    speedSensor_(new SpeedSensor(SPEED_SENSOR_RIGHT_PIN)),
+    localStatusButton_(new LocalStatusButton()),
+    batteryMonitor_(new BatteryMonitor()),
+    lcdDisplay_(new LcdDisplay()),
+    commandParser_(new CommandParser()),
+    telemetryPublisher_(new TelemetryPublisher()),
+    safetyGuard_(new SafetyGuard()),
+    webSocket_(new WebSocketsClient()) {}
 
 void CarController::begin() {
   g_carController = this;
-  Serial.begin(SERIAL_BAUD_RATE);
+  Serial.begin(115200);
   
   setupWiFi();
   setupWebsocket();
 
-  // Redirect telemetry to both Serial and WebSocket (via callback)
-  telemetryPublisher_.begin(Serial);
-  telemetryPublisher_.setJsonCallback([](const String& json) {
-      if (g_carController && g_carController->webSocket_.isConnected()) {
-          g_carController->webSocket_.sendTXT(json);
+  telemetryPublisher_->begin(Serial);
+  telemetryPublisher_->setJsonCallback([](const String& json) {
+      if (g_carController && g_carController->webSocket_->isConnected()) {
+          String mutableJson = json;
+          g_carController->webSocket_->sendTXT(mutableJson);
       }
   });
 
-  engine_.begin();
-  distanceSensorArray_.begin();
-  cliffSensorArray_.begin();
-  speedSensor_.begin();
-  camera_.begin();
-  localStatusButton_.begin();
-  batteryMonitor_.begin();
-  lcdDisplay_.begin();
+  engine_->begin();
+  distanceSensorArray_->begin();
+  cliffSensorArray_->begin();
+  speedSensor_->begin();
+  localStatusButton_->begin();
+  batteryMonitor_->begin();
+  lcdDisplay_->begin();
 
   const unsigned long nowMs = millis();
   lastCommandMs_ = nowMs;
   lastRemoteDriveCommandMs_ = nowMs;
-  telemetryPublisher_.publishEvent("boot", "Car firmware started (WiFi enabled)");
+  telemetryPublisher_->publishEvent("boot", "Car firmware started (WiFi enabled)");
 }
 
 void CarController::setupWiFi() {
@@ -57,11 +61,11 @@ void CarController::setupWiFi() {
 }
 
 void CarController::setupWebsocket() {
-  webSocket_.begin(BACKEND_HOST, BACKEND_PORT, BACKEND_WS_PATH);
-  webSocket_.onEvent([this](WStype_t type, uint8_t * payload, size_t length) {
+  webSocket_->begin(BACKEND_HOST, BACKEND_PORT, BACKEND_WS_PATH);
+  webSocket_->onEvent([this](WStype_t type, uint8_t * payload, size_t length) {
     this->onWebsocketEvent(type, payload, length);
   });
-  webSocket_.setReconnectInterval(5000);
+  webSocket_->setReconnectInterval(5000);
 }
 
 void CarController::onWebsocketEvent(WStype_t type, uint8_t * payload, size_t length) {
@@ -71,11 +75,11 @@ void CarController::onWebsocketEvent(WStype_t type, uint8_t * payload, size_t le
       break;
     case WStype_CONNECTED:
       Serial.println("[WS] Connected to Backend");
-      telemetryPublisher_.publishEvent("ws_connected", "WebSocket connection established");
+      telemetryPublisher_->publishEvent("ws_connected", "WebSocket connection established");
       break;
     case WStype_TEXT: {
       String cmd = String((char*)payload);
-      const ParsedCommand parsedCommand = commandParser_.parseLine(cmd);
+      const ParsedCommand parsedCommand = commandParser_->parseLine(cmd);
       handleCommand(parsedCommand);
       break;
     }
@@ -87,26 +91,26 @@ void CarController::onWebsocketEvent(WStype_t type, uint8_t * payload, size_t le
 void CarController::update() {
   const unsigned long nowMs = millis();
 
-  webSocket_.loop();
+  webSocket_->loop();
   
-  localStatusButton_.update(nowMs);
-  if (localStatusButton_.wasLongPressed()) {
+  localStatusButton_->update(nowMs);
+  if (localStatusButton_->wasLongPressed()) {
     handleModeButtonLongPress();
-  } else if (localStatusButton_.wasShortPressed()) {
+  } else if (localStatusButton_->wasShortPressed()) {
     handleModeButtonShortPress();
   }
 
-  speedSensor_.update(nowMs);
-  batteryMonitor_.update(nowMs);
+  speedSensor_->update(nowMs);
+  batteryMonitor_->update(nowMs);
   updateSensorsIfDue(nowMs);
 
   if (currentDriveMode_ == DriveMode::EmergencyStop) {
-    engine_.stop();
+    engine_->stop();
   } else if (currentDriveMode_ == DriveMode::ManualRemote ||
              currentDriveMode_ == DriveMode::LearningMap) {
     updateManualRemoteMode(nowMs);
   } else {
-    engine_.stop();
+    engine_->stop();
   }
 
   updateLocalDisplay(nowMs);
@@ -118,14 +122,14 @@ void CarController::handleCommand(const ParsedCommand& parsedCommand) {
   lastCommandMs_ = nowMs;
 
   if (!parsedCommand.valid) {
-    telemetryPublisher_.publishCommandAck(parsedCommand.commandName, false,
+    telemetryPublisher_->publishCommandAck(parsedCommand.commandName, false,
                                           parsedCommand.errorMessage);
     return;
   }
 
   if (currentDriveMode_ == DriveMode::EmergencyStop &&
       !commandAllowedInEmergency(parsedCommand.type)) {
-    telemetryPublisher_.publishCommandAck(
+    telemetryPublisher_->publishCommandAck(
         parsedCommand.commandName, false,
         "Emergency stop active. Send RESET_EMERGENCY");
     return;
@@ -142,31 +146,31 @@ void CarController::handleCommand(const ParsedCommand& parsedCommand) {
       latestRemoteMotorSpeeds_ = MotorSpeeds();
       lastRemoteDriveCommandMs_ = nowMs;
       remoteCommandTimedOut_ = false;
-      engine_.stop();
-      telemetryPublisher_.publishCommandAck(parsedCommand.commandName, true, "Remote stop");
+      engine_->stop();
+      telemetryPublisher_->publishCommandAck(parsedCommand.commandName, true, "Remote stop");
       break;
     case CommandType::EmergencyStop:
       enterEmergencyStop("Commanded emergency stop");
-      telemetryPublisher_.publishCommandAck(parsedCommand.commandName, true, "E-Stop engaged");
+      telemetryPublisher_->publishCommandAck(parsedCommand.commandName, true, "E-Stop engaged");
       break;
     case CommandType::ResetEmergency:
       emergencyStopReason_ = "";
       enterIdleMode("Emergency reset");
-      telemetryPublisher_.publishCommandAck(parsedCommand.commandName, true, "E-Stop reset");
+      telemetryPublisher_->publishCommandAck(parsedCommand.commandName, true, "E-Stop reset");
       break;
     case CommandType::PersonDetected:
       personDetectedByAi_ = parsedCommand.personDetected;
       if (personDetectedByAi_ && STOP_ON_PERSON_DETECTED) {
         enterEmergencyStop("Person detected by AI");
       }
-      telemetryPublisher_.publishCommandAck(parsedCommand.commandName, true, "Person detected update");
+      telemetryPublisher_->publishCommandAck(parsedCommand.commandName, true, "Person detected update");
       break;
     case CommandType::PersonLost:
       personDetectedByAi_ = false;
-      telemetryPublisher_.publishCommandAck(parsedCommand.commandName, true, "Person lost update");
+      telemetryPublisher_->publishCommandAck(parsedCommand.commandName, true, "Person lost update");
       break;
     default:
-      telemetryPublisher_.publishCommandAck(parsedCommand.commandName, false, "Unsupported or legacy command");
+      telemetryPublisher_->publishCommandAck(parsedCommand.commandName, false, "Unsupported or legacy command");
       break;
   }
 }
@@ -174,24 +178,24 @@ void CarController::handleCommand(const ParsedCommand& parsedCommand) {
 void CarController::handleSetModeCommand(DriveMode requestedMode) {
   if (requestedMode == DriveMode::Idle) {
     enterIdleMode("Mode set to IDLE");
-    telemetryPublisher_.publishCommandAck("SET_MODE", true, "Mode: IDLE");
+    telemetryPublisher_->publishCommandAck("SET_MODE", true, "Mode: IDLE");
   } else if (requestedMode == DriveMode::ManualRemote) {
     enterManualRemoteMode("Mode set to MANUAL_REMOTE");
-    telemetryPublisher_.publishCommandAck("SET_MODE", true, "Mode: MANUAL_REMOTE");
+    telemetryPublisher_->publishCommandAck("SET_MODE", true, "Mode: MANUAL_REMOTE");
   } else if (requestedMode == DriveMode::StatusDisplay) {
     enterStatusDisplayMode("Mode set to STATUS_DISPLAY");
-    telemetryPublisher_.publishCommandAck("SET_MODE", true, "Mode: STATUS_DISPLAY");
+    telemetryPublisher_->publishCommandAck("SET_MODE", true, "Mode: STATUS_DISPLAY");
   } else if (requestedMode == DriveMode::EmergencyStop) {
     enterEmergencyStop("Mode set to E-STOP");
-    telemetryPublisher_.publishCommandAck("SET_MODE", true, "Mode: E-STOP");
+    telemetryPublisher_->publishCommandAck("SET_MODE", true, "Mode: E-STOP");
   } else {
-     telemetryPublisher_.publishCommandAck("SET_MODE", false, "Mode not supported in WiFi firmware");
+     telemetryPublisher_->publishCommandAck("SET_MODE", false, "Mode not supported in WiFi firmware");
   }
 }
 
 void CarController::handleRemoteDriveCommand(const ParsedCommand& parsedCommand, unsigned long nowMs) {
   if (currentDriveMode_ != DriveMode::ManualRemote && currentDriveMode_ != DriveMode::LearningMap) {
-    telemetryPublisher_.publishCommandAck(parsedCommand.commandName, false, "Requires MANUAL mode");
+    telemetryPublisher_->publishCommandAck(parsedCommand.commandName, false, "Requires MANUAL mode");
     return;
   }
 
@@ -201,7 +205,7 @@ void CarController::handleRemoteDriveCommand(const ParsedCommand& parsedCommand,
   remoteCommandTimedOut_ = false;
   controlSource_ = "BACKEND_JOYSTICK";
 
-  telemetryPublisher_.publishCommandAck(parsedCommand.commandName, true, "Drive applied");
+  telemetryPublisher_->publishCommandAck(parsedCommand.commandName, true, "Drive applied");
 }
 
 void CarController::handleModeButtonShortPress() {
@@ -213,67 +217,67 @@ void CarController::handleModeButtonShortPress() {
   } else {
     enterManualRemoteMode("Button: MANUAL");
   }
-  telemetryPublisher_.publishModeChangedByButton(previousDriveMode, currentDriveMode_);
+  telemetryPublisher_->publishModeChangedByButton(previousDriveMode, currentDriveMode_);
 }
 
 void CarController::handleModeButtonLongPress() {
-  engine_.stop();
+  engine_->stop();
   if (currentDriveMode_ != DriveMode::EmergencyStop) {
     enterStatusDisplayMode("Long press: Status Display");
   } else {
-    lcdDisplay_.turnOn();
+    lcdDisplay_->turnOn();
   }
 }
 
 void CarController::updateManualRemoteMode(unsigned long nowMs) {
   if (lastRemoteDriveCommandMs_ != 0 && nowMs - lastRemoteDriveCommandMs_ > COMMAND_TIMEOUT_MS) {
     latestRemoteMotorSpeeds_ = MotorSpeeds();
-    engine_.stop();
+    engine_->stop();
     if (!remoteCommandTimedOut_) {
-      telemetryPublisher_.publishEvent("timeout", "Remote command timeout");
+      telemetryPublisher_->publishEvent("timeout", "Remote command timeout");
     }
     remoteCommandTimedOut_ = true;
     return;
   }
 
   MotorSpeeds requestedMotorSpeeds = latestRemoteMotorSpeeds_;
-  if (safetyGuard_.shouldBlockForwardMotion() && requestedRemoteMotionMovesForward()) {
+  if (safetyGuard_->shouldBlockForwardMotion() && requestedRemoteMotionMovesForward()) {
     requestedMotorSpeeds.leftMotorSpeed = 0;
     requestedMotorSpeeds.rightMotorSpeed = 0;
   }
-  if (safetyGuard_.shouldBlockBackwardMotion() && requestedRemoteMotionMovesBackward()) {
+  if (safetyGuard_->shouldBlockBackwardMotion() && requestedRemoteMotionMovesBackward()) {
     requestedMotorSpeeds.leftMotorSpeed = 0;
     requestedMotorSpeeds.rightMotorSpeed = 0;
   }
 
-  engine_.setMotorSpeeds(requestedMotorSpeeds.leftMotorSpeed, requestedMotorSpeeds.rightMotorSpeed);
+  engine_->setMotorSpeeds(requestedMotorSpeeds.leftMotorSpeed, requestedMotorSpeeds.rightMotorSpeed);
 }
 
 void CarController::updateSensorsIfDue(unsigned long nowMs) {
   if (nowMs - lastSensorReadMs_ < SENSOR_READ_INTERVAL_MS) return;
 
-  distanceSensorArray_.update(nowMs);
-  cliffSensorArray_.update(nowMs);
-  latestDistanceReadings_ = distanceSensorArray_.getReadings();
-  latestCliffReadings_ = cliffSensorArray_.getReadings();
-  latestSafetyStatus_ = safetyGuard_.update(latestDistanceReadings_, latestCliffReadings_);
+  distanceSensorArray_->update(nowMs);
+  cliffSensorArray_->update(nowMs);
+  latestDistanceReadings_ = distanceSensorArray_->getReadings();
+  latestCliffReadings_ = cliffSensorArray_->getReadings();
+  latestSafetyStatus_ = safetyGuard_->update(latestDistanceReadings_, latestCliffReadings_);
   lastSensorReadMs_ = nowMs;
 }
 
 void CarController::publishTelemetryIfDue(unsigned long nowMs) {
   if (nowMs - lastTelemetryMs_ < TELEMETRY_INTERVAL_MS) return;
-  telemetryPublisher_.publishTelemetry(buildTelemetry(nowMs));
+  telemetryPublisher_->publishTelemetry(buildTelemetry(nowMs));
   lastTelemetryMs_ = nowMs;
 }
 
 void CarController::updateLocalDisplay(unsigned long nowMs) {
   if (isRunningMode(currentDriveMode_)) {
-    lcdDisplay_.turnOff();
+    lcdDisplay_->turnOff();
     return;
   }
-  lcdDisplay_.turnOn();
-  lcdDisplay_.updateStatus(currentDriveMode_, batteryMonitor_.getBatteryPercent(),
-      batteryMonitor_.getBatteryVoltage(), WiFi.localIP().toString().c_str(),
+  lcdDisplay_->turnOn();
+  lcdDisplay_->updateStatus(currentDriveMode_, batteryMonitor_->getBatteryPercent(),
+      batteryMonitor_->getBatteryVoltage(), WiFi.localIP().toString().c_str(),
       latestSafetyStatus_.obstacleDetected, latestSafetyStatus_.cliffDetected,
       personDetectedByAi_, emergencyStopReason_.c_str(), nowMs);
 }
@@ -282,8 +286,8 @@ void CarController::enterIdleMode(const String& reason) {
   currentDriveMode_ = DriveMode::Idle;
   latestRemoteMotorSpeeds_ = MotorSpeeds();
   controlSource_ = "NONE";
-  engine_.stop();
-  if (reason.length() > 0) telemetryPublisher_.publishEvent("idle", reason);
+  engine_->stop();
+  if (reason.length() > 0) telemetryPublisher_->publishEvent("idle", reason);
 }
 
 void CarController::enterManualRemoteMode(const String& reason) {
@@ -292,17 +296,17 @@ void CarController::enterManualRemoteMode(const String& reason) {
   lastRemoteDriveCommandMs_ = millis();
   remoteCommandTimedOut_ = false;
   controlSource_ = "BACKEND_JOYSTICK";
-  engine_.stop();
-  if (reason.length() > 0) telemetryPublisher_.publishEvent("manual", reason);
+  engine_->stop();
+  if (reason.length() > 0) telemetryPublisher_->publishEvent("manual", reason);
 }
 
 void CarController::enterStatusDisplayMode(const String& reason) {
   currentDriveMode_ = DriveMode::StatusDisplay;
   latestRemoteMotorSpeeds_ = MotorSpeeds();
   controlSource_ = "STATUS";
-  engine_.stop();
-  lcdDisplay_.turnOn();
-  if (reason.length() > 0) telemetryPublisher_.publishEvent("status", reason);
+  engine_->stop();
+  lcdDisplay_->turnOn();
+  if (reason.length() > 0) telemetryPublisher_->publishEvent("status", reason);
 }
 
 void CarController::enterEmergencyStop(const String& reason) {
@@ -310,8 +314,8 @@ void CarController::enterEmergencyStop(const String& reason) {
   emergencyStopReason_ = reason;
   latestRemoteMotorSpeeds_ = MotorSpeeds();
   controlSource_ = "SAFETY";
-  engine_.stop();
-  telemetryPublisher_.publishEvent("emergency", reason);
+  engine_->stop();
+  telemetryPublisher_->publishEvent("emergency", reason);
 }
 
 bool CarController::requestedRemoteMotionMovesForward() const {
@@ -330,9 +334,9 @@ CarTelemetry CarController::buildTelemetry(unsigned long nowMs) const {
   CarTelemetry carTelemetry;
   carTelemetry.mode = currentDriveMode_;
   carTelemetry.timestampMs = nowMs;
-  carTelemetry.leftMotorSpeed = engine_.leftMotorSpeed();
-  carTelemetry.rightMotorSpeed = engine_.rightMotorSpeed();
-  carTelemetry.speedValue = speedSensor_.speedValue();
+  carTelemetry.leftMotorSpeed = engine_->leftMotorSpeed();
+  carTelemetry.rightMotorSpeed = engine_->rightMotorSpeed();
+  carTelemetry.speedValue = speedSensor_->speedValue();
   carTelemetry.distanceCm = latestDistanceReadings_.frontDistanceCm;
   carTelemetry.distanceValid = latestDistanceReadings_.frontValid;
   carTelemetry.distanceReadings = latestDistanceReadings_;
@@ -344,10 +348,10 @@ CarTelemetry CarController::buildTelemetry(unsigned long nowMs) const {
   carTelemetry.personDetected = personDetectedByAi_;
   carTelemetry.emergencyStopReason = emergencyStopReason_;
   carTelemetry.controlSource = controlSource_;
-  carTelemetry.batteryVoltage = batteryMonitor_.getBatteryVoltage();
-  carTelemetry.batteryPercent = batteryMonitor_.getBatteryPercent();
-  carTelemetry.lcdStatus = lcdDisplay_.status();
-  carTelemetry.lcdEnabled = lcdDisplay_.isEnabled();
+  carTelemetry.batteryVoltage = batteryMonitor_->getBatteryVoltage();
+  carTelemetry.batteryPercent = batteryMonitor_->getBatteryPercent();
+  carTelemetry.lcdStatus = lcdDisplay_->status();
+  carTelemetry.lcdEnabled = lcdDisplay_->isEnabled();
   carTelemetry.currentNode = WiFi.localIP().toString(); // Use IP as node for now
   return carTelemetry;
 }

@@ -4,10 +4,12 @@
 
 SpeedSensor* SpeedSensor::activeInstance_ = nullptr;
 
+SpeedSensor::SpeedSensor(int sensorPin) : sensorPin_(sensorPin) {}
+
 void SpeedSensor::begin() {
   activeInstance_ = this;
-  pinMode(SPEED_SENSOR_PIN, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(SPEED_SENSOR_PIN), handlePulseInterrupt,
+  pinMode(sensorPin_, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(sensorPin_), handlePulseInterrupt,
                   RISING);
   lastSampleMs_ = millis();
 }

@@ -5,6 +5,7 @@
 
 class SpeedSensor {
  public:
+  SpeedSensor(int sensorPin);
   void begin();
   void update(unsigned long nowMs);
   float speedValue() const;
@@ -12,6 +13,7 @@ class SpeedSensor {
  private:
   static void IRAM_ATTR handlePulseInterrupt();
 
+  int sensorPin_;
   volatile unsigned long pulseCount_ = 0;
   unsigned long lastSampleMs_ = 0;
   unsigned long lastPulseCount_ = 0;

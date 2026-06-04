@@ -3,8 +3,8 @@ from typing import Any
 from app.navigation.localization_service import LocalizationService
 from app.navigation.map_graph import MapGraph
 from app.schemas.route_segment import RouteGuidanceDecision, RouteSelectionState
-from app.services.car_control_service import CarControlService
-from app.services.telemetry_service import TelemetryService
+from app.services.robot.car_control_service import CarControlService
+from app.services.robot.telemetry_service import TelemetryService
 
 
 class RouteSegmentService:

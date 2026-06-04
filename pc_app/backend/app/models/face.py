@@ -11,6 +11,7 @@ class FaceTarget(Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     display_name: Mapped[str] = mapped_column(String(100), index=True)
     status: Mapped[str] = mapped_column(String(20), default="ACTIVE", index=True) # ACTIVE, DISABLED
+    is_active_target: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     notes: Mapped[Optional[str]] = mapped_column(String(1024), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     disabled_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)

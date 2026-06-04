@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     serial_baud_rate: int = Field(default=115200, validation_alias="SERIAL_BAUD_RATE")
 
     # Policy & Timeout
+    enable_robot_control: bool = Field(default=True, validation_alias="ENABLE_ROBOT_CONTROL")
     remote_drive_max_motor_speed: int = Field(default=255, validation_alias="REMOTE_DRIVE_MAX_MOTOR_SPEED")
     joystick_offline_timeout_seconds: float = Field(default=1.0, validation_alias="JOYSTICK_OFFLINE_TIMEOUT_SECONDS")
     car_offline_timeout_seconds: float = Field(default=2.0, validation_alias="CAR_OFFLINE_TIMEOUT_SECONDS")
@@ -79,6 +80,11 @@ class Settings(BaseSettings):
     max_camera_viewers_per_camera: int = Field(default=4, validation_alias="MAX_CAMERA_VIEWERS_PER_CAMERA")
     camera_viewer_send_timeout_seconds: float = Field(default=0.25, validation_alias="CAMERA_VIEWER_SEND_TIMEOUT_SECONDS")
 
-
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore"
+    )
 
 settings = Settings()

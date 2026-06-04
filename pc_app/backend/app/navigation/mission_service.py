@@ -3,7 +3,7 @@ from typing import Any
 from app.navigation.coverage_planner import CoveragePlanner
 from app.navigation.localization_service import LocalizationService
 from app.navigation.path_planner import PathPlanner
-from app.services.car_control_service import CarControlService
+from app.services.robot.car_control_service import CarControlService
 
 
 class MissionService:

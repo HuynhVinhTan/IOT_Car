@@ -1,7 +1,7 @@
 import logging.config
 import os
 
-from app.core.config import Settings
+from app.core.config import settings
 
 os.makedirs("logs", exist_ok=True)
 
@@ -34,12 +34,12 @@ LOGGING_CONFIG = {
     },
     "formatters": {
         "standard": {
-            "format": Settings.log_format,
+            "format": settings.logger_format,
         },
     },
     "handlers": {
         "default": {
-            "level": Settings.log_level,
+            "level": settings.logger_level,
             "formatter": "standard",
             "class": "logging.StreamHandler",
             "stream": "ext://sys.stdout",
@@ -84,7 +84,7 @@ LOGGING_CONFIG = {
             "filters": ["error_only"],
         },
         "sqlalchemy_file": {
-            "level": Settings.sqlalchemy_log_level,
+            "level": settings.sqlalchemy_log_level,
             "formatter": "standard",
             "class": "logging.handlers.RotatingFileHandler",
             "filename": "logs/sqlalchemy.log",
@@ -104,7 +104,7 @@ LOGGING_CONFIG = {
     },
     "loggers": {
         "": {
-            "level": Settings.log_level,
+            "level": settings.logger_level,
             "handlers": [
                 "default",
                 "app_file",
@@ -115,17 +115,17 @@ LOGGING_CONFIG = {
             "propagate": False,
         },
         "uvicorn.error": {
-            "level": Settings.log_level,
+            "level": settings.logger_level,
             "handlers": ["default", "app_file", "error_file"],
             "propagate": False,
         },
         "uvicorn.access": {
-            "level": Settings.log_level,
+            "level": settings.logger_level,
             "handlers": ["default", "app_file"],
             "propagate": False,
         },
         "sqlalchemy.engine": {
-            "level": Settings.sqlalchemy_log_level,
+            "level": settings.sqlalchemy_log_level,
             "handlers": ["default", "sqlalchemy_file"],
             "propagate": False,
         },
