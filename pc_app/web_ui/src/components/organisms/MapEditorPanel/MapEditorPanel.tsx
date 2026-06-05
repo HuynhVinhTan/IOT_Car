@@ -207,11 +207,14 @@ export function MapEditorPanel() {
           alignItems: "center",
         }}
       >
-        <button onClick={newMap}>New Map</button>
-        <button onClick={saveMap} disabled={!currentMap}>
+        <button className="btn" onClick={newMap}>
+          New Map
+        </button>
+        <button className="btn" onClick={saveMap} disabled={!currentMap}>
           Save Map
         </button>
         <button
+          className="btn"
           onClick={activateMap}
           disabled={!currentMap}
           style={{
@@ -221,7 +224,9 @@ export function MapEditorPanel() {
         >
           {activeMap === currentMap?.id ? "✓ Active Map" : "Set Active Map"}
         </button>
-        <button onClick={loadMaps}>Refresh List</button>
+        <button className="btn" onClick={loadMaps}>
+          Refresh List
+        </button>
         <select
           onChange={(e) => e.target.value && loadMap(e.target.value)}
           value={currentMap?.id || ""}
@@ -274,7 +279,7 @@ export function MapEditorPanel() {
 
       {currentMap && (
         <div style={{ marginBottom: "10px" }}>
-          <button
+          <button className="btn"
             onClick={() => {}}
             style={{
               background: activeMap === currentMap.id ? "#e8f5e9" : "#f0f0f0",
@@ -386,7 +391,7 @@ export function MapEditorPanel() {
                 style={{ marginLeft: "5px" }}
               />
             </label>
-            <button onClick={() => deleteEdge(selectedEdge)}>
+            <button className="btn" onClick={() => deleteEdge(selectedEdge)}>
               Delete Edge
             </button>
           </div>
@@ -420,49 +425,80 @@ export function MapEditorPanel() {
             <option value="target">Target</option>
             <option value="checkpoint">Checkpoint</option>
           </select>
-          <button onClick={() => deleteNode(selectedNode)}>Delete Node</button>
+          <button className="btn" onClick={() => deleteNode(selectedNode)}>Delete Node</button>
         </div>
       )}
 
-      <div
-        style={{
-          marginTop: "10px",
-          maxHeight: "200px",
-          overflow: "auto",
-          border: "1px solid #ccc",
-          padding: "10px",
-        }}
-      >
-        <h4>Debug Info</h4>
-        <div>
-          <strong>Nodes ({nodes.length}):</strong>
-        </div>
+    <div style={{
+      marginTop: "10px",
+      background: "#f7f9fb",
+      border: "0.5px solid #d7dee5",
+      borderRadius: "10px",
+      padding: "12px 14px",
+    }}>
+      <div style={{ fontSize: "12px", fontWeight: 600, color: "#5d6b78", textTransform: "uppercase", letterSpacing: "0.4px", marginBottom: "10px" }}>
+        Debug Info
+      </div>
+
+      {/* Nodes */}
+      <div style={{ fontSize: "11px", fontWeight: 600, color: "#37434f", marginBottom: "6px" }}>
+        Nodes ({nodes.length})
+      </div>
+      <div style={{ display: "grid", gap: "4px", marginBottom: "12px", maxHeight: "120px", overflow: "auto" }}>
         {nodes.map((n) => (
-          <div key={n.id} style={{ fontSize: "12px" }}>
-            {n.id}: ({n.x.toFixed(0)}, {n.y.toFixed(0)}) - {n.type}
+          <div key={n.id} style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            background: "#ffffff", border: "0.5px solid #d7dee5", borderRadius: "6px",
+            padding: "4px 10px", fontSize: "11px", color: "#37434f",
+          }}>
+            <span style={{ fontFamily: "monospace", color: "#5d6b78" }}>{n.label || n.id}</span>
+            <span>({n.x.toFixed(0)}, {n.y.toFixed(0)})</span>
+            <span style={{
+              padding: "1px 7px", borderRadius: "999px", fontSize: "10px", fontWeight: 600,
+              background: n.type === "home" ? "#e8f5e9" : n.type === "target" ? "#ffebee" : n.type === "checkpoint" ? "#fff3e0" : "#e3f2fd",
+              color: n.type === "home" ? "#1b5e20" : n.type === "target" ? "#b71c1c" : n.type === "checkpoint" ? "#e65100" : "#0d47a1",
+            }}>{n.type}</span>
           </div>
         ))}
-        <div style={{ marginTop: "10px" }}>
-          <strong>Edges ({edges.length}):</strong>
-        </div>
+      </div>
+
+      {/* Edges */}
+      <div style={{ fontSize: "11px", fontWeight: 600, color: "#37434f", marginBottom: "6px" }}>
+        Edges ({edges.length})
+      </div>
+      <div style={{ display: "grid", gap: "4px", marginBottom: "12px", maxHeight: "120px", overflow: "auto" }}>
         {edges.map((e) => (
-          <div key={e.id} style={{ fontSize: "12px" }}>
-            {e.id}: {e.from} → {e.to} ({e.distance?.toFixed(1)}px)
+          <div key={e.id} style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            background: "#ffffff", border: "0.5px solid #d7dee5", borderRadius: "6px",
+            padding: "4px 10px", fontSize: "11px", color: "#37434f",
+          }}>
+            <span style={{ fontFamily: "monospace", color: "#5d6b78" }}>
+              {e.from.replace("node_", "").slice(-4)} → {e.to.replace("node_", "").slice(-4)}
+            </span>
+            <span style={{ color: "#9aa8b5" }}>{e.distance?.toFixed(1)}px</span>
             <button
               onClick={() => deleteEdge(e.id)}
-              style={{ marginLeft: "5px", fontSize: "10px" }}
-            >
-              X
-            </button>
+              style={{
+                background: "#ffebee", border: "none", borderRadius: "4px",
+                color: "#b71c1c", fontSize: "10px", fontWeight: 600,
+                padding: "2px 7px", cursor: "pointer",
+              }}
+            >✕</button>
           </div>
         ))}
-        <div style={{ marginTop: "10px" }}>
-          <strong>JSON Preview:</strong>
-        </div>
-        <pre style={{ fontSize: "10px", maxHeight: "100px", overflow: "auto" }}>
-          {JSON.stringify({ id: currentMap?.id, nodes, edges }, null, 2)}
-        </pre>
       </div>
+
+      {/* JSON */}
+      <div style={{ fontSize: "11px", fontWeight: 600, color: "#37434f", marginBottom: "6px" }}>JSON</div>
+      <pre style={{
+        margin: 0, fontSize: "10px", maxHeight: "100px", overflow: "auto",
+        background: "#ffffff", border: "0.5px solid #d7dee5", borderRadius: "6px",
+        padding: "8px 10px", lineHeight: 1.5, color: "#37434f",
+      }}>
+        {JSON.stringify({ id: currentMap?.id, nodes, edges }, null, 2)}
+      </pre>
+    </div>
     </Card>
   );
 }

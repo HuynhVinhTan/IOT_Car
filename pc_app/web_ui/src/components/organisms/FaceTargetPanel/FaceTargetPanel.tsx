@@ -91,12 +91,42 @@ export function FaceTargetPanel() {
             placeholder="Person Name"
             style={{ padding: "8px" }}
           />
-          <input
-            type="file"
-            ref={fileInputRef}
-            accept="image/*"
-            onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-          />
+         {/* Ẩn input gốc, giữ nguyên ref và logic */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          accept="image/*"
+          onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+          style={{ display: "none" }}
+        />
+
+        {/* Button thay thế */}
+        <label
+          onClick={() => fileInputRef.current?.click()}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            padding: "7px 14px",
+            border: "0.5px solid #b7c2cd",
+            borderRadius: "8px",
+            background: "#ffffff",
+            color: "#172026",
+            fontSize: "13px",
+            fontWeight: 500,
+            cursor: "pointer",
+            transition: "background 0.15s",
+          }}
+          onMouseEnter={e => (e.currentTarget.style.background = "#f4f7fa")}
+          onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          {selectedFile ? selectedFile.name : "Chọn ảnh..."}
+        </label>
           <Button variant="primary" onClick={handleRegister} disabled={loading}>
             {loading ? "Uploading..." : "Add Target"}
           </Button>

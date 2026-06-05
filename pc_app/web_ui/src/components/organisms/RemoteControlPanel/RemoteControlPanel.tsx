@@ -297,7 +297,7 @@ export function RemoteControlPanel() {
           flexWrap: "wrap",
         }}
       >
-        <button
+        <button className="btn"
           onClick={(e) => {
             setKeyboardEnabled(!keyboardEnabled);
             e.currentTarget.blur();
@@ -309,7 +309,7 @@ export function RemoteControlPanel() {
         </button>
 
         {!isManualMode && isConnected && (
-          <button
+          <button className="btn"
             onClick={switchToManualMode}
             style={{ background: "#ffc107", color: "black" }}
           >
@@ -317,7 +317,7 @@ export function RemoteControlPanel() {
           </button>
         )}
 
-        <button
+        <button className="btn"
           onClick={startAutonomous}
           disabled={!isConnected || !activeMapId}
           style={{
@@ -397,7 +397,7 @@ export function RemoteControlPanel() {
               ))}
             </select>
           </label>
-          <button
+          <button className="button-activate"
             onClick={async () => {
               if (selectedMapId) {
                 try {

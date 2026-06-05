@@ -18,14 +18,19 @@ import { stopJoystickAlert } from "../../services/joystickService";
 import { getAIStatus, type AIStatus } from "../../services/aiService";
 import { getTrainingStatus } from "../../services/trainingService";
 import { getDetectionState } from "../../services/detectionService";
+import type { DetectionState } from "../../services/detectionService";
 import { getCarStatus } from "../../services/carService";
+import { usePersonDetection } from "../../hooks/usePersonDetection";
+import { usePersonDetectionAlert } from "../../hooks/usePersonDetectionAlert";
 
 export function DashboardPage() {
   const [activeMode, setActiveMode] = useState<DashboardMode>("overview");
   const [backendConnected, setBackendConnected] = useState<boolean>(false);
   const [aiStatus, setAiStatus] = useState<AIStatus | null>(null);
   const [trainingStatus, setTrainingStatus] = useState<any>(null);
-  const [detectionState, setDetectionState] = useState<any>(null);
+  const [detectionState, setDetectionState] = useState<DetectionState | null>(
+    null
+  );
   const [carStatus, setCarStatus] = useState<{
     connected: boolean;
     mode: string;
@@ -38,6 +43,13 @@ export function DashboardPage() {
   } = useCarTelemetrySocket();
   const { connected: joystickSocketConnected, joystickTelemetry } =
     useJoystickTelemetrySocket();
+
+  const personDetection = usePersonDetection(
+    carTelemetry,
+    detectionState,
+    events
+  );
+  usePersonDetectionAlert(personDetection.detected);
 
   const {
     segments,
@@ -117,12 +129,16 @@ export function DashboardPage() {
           cameraReady={aiStatus?.camera_connected || false}
           aiReady={aiStatus?.status === "READY"}
           isRecording={trainingStatus?.status === "RECORDING"}
-          personFound={detectionState?.object_found || false}
+          personFound={personDetection.detected}
         />
       }
       left={
         <>
-          <CameraPanel personDetected={carTelemetry?.person_detected} />
+          <CameraPanel
+            personDetected={personDetection.detected}
+            confidence={personDetection.confidence}
+            displayName={personDetection.displayName}
+          />
           <MapPanel
             carTelemetry={carTelemetry}
             segments={segments}
