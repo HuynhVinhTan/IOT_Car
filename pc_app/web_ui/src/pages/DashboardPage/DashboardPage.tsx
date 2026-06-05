@@ -49,7 +49,7 @@ export function DashboardPage() {
     detectionState,
     events
   );
-  usePersonDetectionAlert(personDetection.detected);
+usePersonDetectionAlert(personDetection.detected && backendConnected);
 
   const {
     segments,

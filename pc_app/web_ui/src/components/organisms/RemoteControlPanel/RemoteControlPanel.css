@@ -1,0 +1,338 @@
+/* Remote Control Panel */
+
+.remote-control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Status Box */
+.remote-status-box {
+  padding: 12px;
+  background: #f7f9fb;
+  border: 1px solid #eef2f5;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.remote-status-label {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.remote-status-connected {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.remote-status-offline {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.remote-status-item {
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.remote-status-error {
+  color: #c62828;
+  font-size: 11px;
+  margin-top: 6px;
+  padding: 6px;
+  background: #ffebee;
+  border-radius: 4px;
+}
+
+.remote-status-warning {
+  color: #e65100;
+  font-weight: 500;
+}
+
+/* Button Group */
+.remote-button-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.remote-btn {
+  padding: 8px 16px;
+  min-height: 36px;
+  background: #ffffff;
+  color: #172026;
+  border: 1px solid #d7dee5;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.remote-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #b7c2cd;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.remote-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.remote-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.remote-btn.active {
+  background: #1565c0;
+  color: #ffffff;
+  border-color: #0d47a1;
+  font-weight: 600;
+}
+
+.remote-btn.active:hover:not(:disabled) {
+  background: #0d47a1;
+  box-shadow: 0 2px 8px rgba(13, 71, 161, 0.2);
+}
+
+.remote-btn.warning {
+  background: #ffc107;
+  color: #000;
+  border-color: #ffb300;
+}
+
+.remote-btn.warning:hover:not(:disabled) {
+  background: #ffb300;
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+}
+
+.remote-btn.info {
+  background: #17a2b8;
+  color: #ffffff;
+  border-color: #138496;
+}
+
+.remote-btn.info:hover:not(:disabled) {
+  background: #138496;
+  box-shadow: 0 2px 8px rgba(23, 162, 184, 0.2);
+}
+
+/* Error Message */
+.remote-error-message {
+  color: #c62828;
+  font-size: 12px;
+  padding: 10px;
+  background: #ffebee;
+  border: 1px solid #ef5350;
+  border-radius: 6px;
+  line-height: 1.5;
+}
+
+.remote-control-disabled {
+  color: #c62828;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Autonomous Section */
+.remote-autonomous-section {
+  padding: 12px;
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+}
+
+.remote-autonomous-title {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #172026;
+}
+
+.remote-autonomous-item {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.remote-autonomous-label {
+  font-weight: 600;
+}
+
+.remote-autonomous-active {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.remote-autonomous-inactive {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.remote-map-select {
+  padding: 6px 8px;
+  border: 1px solid #d7dee5;
+  border-radius: 4px;
+  font-size: 12px;
+  background: #ffffff;
+  color: #172026;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.remote-map-select:hover:not(:disabled) {
+  border-color: #b7c2cd;
+}
+
+.remote-map-select:focus {
+  outline: 2px solid #1565c0;
+  outline-offset: 0;
+}
+
+.remote-map-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.remote-activate-btn {
+  padding: 6px 12px;
+  min-height: 32px;
+  background: #1565c0;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.remote-activate-btn:hover:not(:disabled) {
+  background: #0d47a1;
+  box-shadow: 0 2px 6px rgba(13, 71, 161, 0.2);
+}
+
+.remote-activate-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.remote-activate-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.remote-control-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  width: 150px;
+  transition: opacity 0.2s ease;
+  margin: 0 auto;
+}
+
+.remote-control-grid.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.remote-control-btn {
+  aspect-ratio: 1;
+  padding: 0;
+  background: #f0f0f0;
+  border: 2px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #172026;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.remote-control-btn:hover:not(:disabled) {
+  background: #e8e8e8;
+  border-color: #b0b0b0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.remote-control-btn:active {
+  background: #d8d8d8;
+  border-color: #a0a0a0;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+  transform: scale(0.98);
+}
+
+.remote-control-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.remote-control-stop {
+  grid-column: 2;
+  grid-row: 2;
+  background: #c62828;
+  color: #ffffff;
+  border-color: #b71c1c;
+  font-size: 14px;
+}
+
+.remote-control-stop:hover {
+  background: #b71c1c;
+  border-color: #a01c1c;
+}
+
+.remote-control-stop:active {
+  background: #a01c1c;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .remote-control-panel {
+    gap: 12px;
+  }
+
+  .remote-button-group {
+    gap: 8px;
+  }
+
+  .remote-btn {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .remote-autonomous-section {
+    padding: 10px;
+  }
+
+  .remote-autonomous-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .remote-map-select {
+    width: 100%;
+  }
+
+  .remote-activate-btn {
+    width: 100%;
+  }
+
+  .remote-control-grid {
+    margin: 0 auto;
+  }
+}

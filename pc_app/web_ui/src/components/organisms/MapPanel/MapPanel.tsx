@@ -7,6 +7,7 @@ import type {
 } from "../../../types/routeSegment";
 import { useMapState } from "../../../hooks/useMapState";
 import type { MapNode, MapEdge } from "../../../services/mapService";
+import {MapIcon} from "lucide-react";
 
 // UI Layout coordinates only.
 // Truth about which segments exist comes from Backend via props.
@@ -217,7 +218,12 @@ export function MapPanel({
   };
 
   return (
-    <Card title="Map">
+    <Card  title={
+      <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        <MapIcon size={14} />
+        Map
+      </span>
+    }>
       {loading && (
         <div
           style={{
