@@ -1,7 +1,5 @@
 from fastapi import APIRouter, Request
-
-from app.schemas.route_segment import SelectSegmentRequest, HeadingHintRequest
-
+from app.schemas.route_segment import SelectSegmentRequest, HeadingHintRequest, SetStartPositionRequest
 
 router = APIRouter(prefix="/api/routes", tags=["route_segments"])
 
@@ -37,4 +35,14 @@ def auto_infer(request: Request) -> dict:
 def heading_hint(request: Request, payload: HeadingHintRequest) -> dict:
     return request.app.state.route_segment_service.heading_hint(
         payload.segment_id, payload.heading_hint_x, payload.heading_hint_y
+    )
+
+@router.post("/set-start-position")
+async def set_start_position(request: Request, payload: SetStartPositionRequest) -> dict:
+    """
+    User declares: "robot is on segment X, already at Y% from the from_node."
+    Backend calculates remaining distance → drives to to_node → continues mission.
+    """
+    return request.app.state.route_segment_service.set_start_position(
+        payload.segment_id, payload.offset_pct
     )

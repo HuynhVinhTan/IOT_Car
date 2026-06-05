@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any
 
 from app.navigation.localization_service import LocalizationService
@@ -5,6 +6,16 @@ from app.navigation.map_graph import MapGraph
 from app.schemas.route_segment import RouteGuidanceDecision, RouteSelectionState
 from app.services.robot.car_control_service import CarControlService
 from app.services.robot.telemetry_service import TelemetryService
+
+# Pixels-per-cm scale: 1 pixel on the canvas = PIXEL_TO_CM real-world centimetres.
+# Tune this constant once you've measured your real track.
+PIXEL_TO_CM: float = 2.0
+
+# Fixed drive speed for auto-navigation segments (0–255).
+DRIVE_SPEED: int = 160
+
+# How fast the robot moves in cm/s at DRIVE_SPEED.  Measure on the real car.
+SPEED_CM_PER_S: float = 20.0
 
 
 class RouteSegmentService:
@@ -133,3 +144,108 @@ class RouteSegmentService:
             "Could not infer segment. Please select manually."
         )
         return self.get_current_selection()
+
+    # ------------------------------------------------------------------
+    # Start-position API
+    # ------------------------------------------------------------------
+
+    def set_start_position(
+        self, segment_id: str, offset_pct: float
+    ) -> dict[str, Any]:
+        """
+        User tells us: "robot is on segment_id, already travelled offset_pct of it."
+        We update localization and kick off an async mission task.
+        """
+        position_info = self._localization_service.set_start_position(
+            segment_id, offset_pct
+        )
+        if not position_info.get("ok"):
+            return {"ok": False, "reason": position_info.get("reason", "Unknown error")}
+
+        # Fire-and-forget async mission
+        asyncio.create_task(self._run_mission_from_segment(segment_id, offset_pct))
+
+        return {
+            "ok": True,
+            "message": f"Mission started from {segment_id} at {int(offset_pct * 100)}%",
+            **position_info,
+        }
+
+    async def _run_mission_from_segment(
+        self, start_segment_id: str, offset_pct: float
+    ) -> None:
+        """
+        Core mission orchestrator:
+          1. Drive remaining part of start_segment to its to_node
+          2. Then walk every subsequent segment in order until the map is done
+        """
+        all_segments = self.get_segments()
+        seg_map = {s["segment_id"]: s for s in all_segments}
+
+        # --- Step 1: finish the partial start segment ---
+        start_seg = seg_map.get(start_segment_id)
+        if not start_seg:
+            return
+
+        remaining_pct = 1.0 - offset_pct
+        pixel_dist = self._map_graph.segment_pixel_distance(start_segment_id)
+        if pixel_dist and remaining_pct > 0:
+            remaining_cm = pixel_dist * PIXEL_TO_CM * remaining_pct
+            duration_ms = int((remaining_cm / SPEED_CM_PER_S) * 1000)
+            await self._car_control_service.drive_timed(
+                duration_ms, DRIVE_SPEED, DRIVE_SPEED
+            )
+
+        # Mark arrival at to_node of the start segment
+        arrived_node = start_seg["to_node"]
+        self._localization_service.update_location(
+            current_node=arrived_node, current_segment=start_segment_id
+        )
+
+        # --- Step 2: run remaining segments in order ---
+        await self._continue_mission_from_node(arrived_node, seg_map)
+
+    async def _continue_mission_from_node(
+        self,
+        current_node: str,
+        seg_map: dict[str, Any],
+    ) -> None:
+        """
+        Greedily traverse segments from current_node until no unvisited
+        unblocked segment starts from the current node.
+        """
+        while True:
+            # Find the next segment that starts at current_node and is not blocked/visited
+            next_seg = None
+            for seg in seg_map.values():
+                if (
+                    seg["from_node"] == current_node
+                    and not seg.get("is_blocked")
+                    and not seg.get("is_visited")
+                ):
+                    next_seg = seg
+                    break
+
+            if next_seg is None:
+                # Mission complete — no more segments to visit
+                self._localization_service.update_location(
+                    current_node=current_node
+                )
+                return
+
+            seg_id = next_seg["segment_id"]
+            pixel_dist = self._map_graph.segment_pixel_distance(seg_id)
+            if pixel_dist:
+                duration_ms = int((pixel_dist * PIXEL_TO_CM / SPEED_CM_PER_S) * 1000)
+                self._localization_service.update_location(current_segment=seg_id)
+                await self._car_control_service.drive_timed(
+                    duration_ms, DRIVE_SPEED, DRIVE_SPEED
+                )
+
+            # Mark arrival
+            current_node = next_seg["to_node"]
+            self._localization_service.update_location(
+                current_node=current_node, current_segment=seg_id
+            )
+            # Mark segment visited so we don't loop
+            next_seg["is_visited"] = True

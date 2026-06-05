@@ -49,6 +49,7 @@ export function DashboardPage() {
     cancel,
     autoInfer,
     refreshData,
+    setStartPosition,
   } = useRouteSegments();
 
   const fetchStatus = async () => {
@@ -148,6 +149,7 @@ export function DashboardPage() {
           cancelSegment={cancel}
           autoInfer={autoInfer}
           refreshSegments={refreshData}
+          setStartPosition={setStartPosition}
           onRefreshStatus={fetchStatus}
         />
       }

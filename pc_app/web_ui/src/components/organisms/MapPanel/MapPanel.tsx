@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card } from "../../atoms/Card/Card";
 import type { CarTelemetry } from "../../../types/carTelemetry";
 import type {
@@ -7,6 +7,7 @@ import type {
 } from "../../../types/routeSegment";
 import { useMapState } from "../../../hooks/useMapState";
 import type { MapNode, MapEdge } from "../../../services/mapService";
+import { loadMapToCar } from "../../../services/carService";
 
 // UI Layout coordinates only.
 // Truth about which segments exist comes from Backend via props.
@@ -38,6 +39,13 @@ export function MapPanel({
   const { mapState } = useMapState();
   const svgRef = useRef<SVGSVGElement>(null);
 
+  const [isSelectingStartNode, setIsSelectingStartNode] = useState(false);
+  const [selectedStartNodeId, setSelectedStartNodeId] = useState<string | null>(
+    null,
+  );
+  const [startNodeError, setStartNodeError] = useState<string | null>(null);
+  const [sendingStartNode, setSendingStartNode] = useState(false);
+
   // Zoom and Pan state
   const [zoom, setZoom] = useState(1);
   const [panX, setPanX] = useState(0);
@@ -53,6 +61,21 @@ export function MapPanel({
 
   // Use active map if available, otherwise fall back to route segments
   const useActiveMap = mapState && mapState.nodes && mapState.nodes.length > 0;
+
+  // When active map changes, prompt user to pick a start node to push map to the car.
+  useEffect(() => {
+    if (!useActiveMap || !mapState?.id) {
+      setIsSelectingStartNode(false);
+      setSelectedStartNodeId(null);
+      setStartNodeError(null);
+      setSendingStartNode(false);
+      return;
+    }
+
+    setIsSelectingStartNode(true);
+    setSelectedStartNodeId(null);
+    setStartNodeError(null);
+  }, [mapState?.id, useActiveMap]);
 
   // Build layout and node data from active map nodes if available
   const mapLayout: Record<string, { x: number; y: number }> = {};
@@ -191,6 +214,10 @@ export function MapPanel({
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    const el = e.target as Element | null;
+    if (el && el.closest && el.closest("[data-map-node-id]")) {
+      return;
+    }
     if (e.button === 0) {
       setIsPanning(true);
       setStartPan({ x: e.clientX - panX, y: e.clientY - panY });
@@ -214,6 +241,23 @@ export function MapPanel({
     setZoom(1);
     setPanX(0);
     setPanY(0);
+  };
+
+  const handleSelectStartNode = async (nodeId: string) => {
+    if (!useActiveMap || !mapState?.id) return;
+    if (!isSelectingStartNode || sendingStartNode) return;
+
+    setSendingStartNode(true);
+    setStartNodeError(null);
+    try {
+      await loadMapToCar(mapState.id, nodeId);
+      setSelectedStartNodeId(nodeId);
+      setIsSelectingStartNode(false);
+    } catch (e: any) {
+      setStartNodeError(e?.message || "Failed to load map to car");
+    } finally {
+      setSendingStartNode(false);
+    }
   };
 
   return (
@@ -280,6 +324,24 @@ export function MapPanel({
             {useActiveMap
               ? `Active: ${mapState?.name || mapState?.id}`
               : "Route segments fallback"}
+            {useActiveMap && (
+              <div style={{ marginTop: "4px" }}>
+                {isSelectingStartNode ? (
+                  <span>
+                    {sendingStartNode
+                      ? "Sending map to car..."
+                      : "Click a node to set START and send map"}
+                  </span>
+                ) : selectedStartNodeId ? (
+                  <span>Start: {selectedStartNodeId}</span>
+                ) : (
+                  <span />
+                )}
+                {startNodeError && (
+                  <div style={{ color: "#ffb3b3" }}>{startNodeError}</div>
+                )}
+              </div>
+            )}
           </div>
           <div
             style={{
@@ -376,7 +438,7 @@ export function MapPanel({
                 const isTarget = nodeId === targetNode;
                 const isVisited = visitedNodes.has(nodeId);
                 return (
-                  <g key={nodeId}>
+                  <g key={nodeId} data-map-node-id={nodeId}>
                     <circle
                       cx={node.x}
                       cy={node.y}
@@ -388,6 +450,17 @@ export function MapPanel({
                         isTarget ? "target" : "",
                         isVisited ? "visited" : "",
                       ].join(" ")}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        void handleSelectStartNode(nodeId);
+                      }}
+                      style={{
+                        cursor:
+                          useActiveMap && isSelectingStartNode
+                            ? "pointer"
+                            : "default",
+                      }}
                     />
                     <text
                       x={node.x}

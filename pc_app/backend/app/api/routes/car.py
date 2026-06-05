@@ -1,8 +1,18 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Request
+
+import json
+import pathlib
+
+from pydantic import BaseModel, Field
 
 from app.schemas.car_command import CarCommand, ModeRequest
 
 router = APIRouter(prefix="/api/car", tags=["car"])
+
+
+class LoadMapRequest(BaseModel):
+    map_id: str = Field(min_length=1)
+    start_node_id: str = Field(min_length=1)
 
 
 @router.get("/status")
@@ -52,6 +62,82 @@ async def send_command_to_car(request: Request, payload: dict) -> dict:
             "reason": "car_command_forward_failed",
             "detail": str(exc)
         }
+
+
+@router.post("/load-map")
+async def load_map(request: Request, body: LoadMapRequest) -> dict:
+
+    """Load a stored map from disk and forward it to the car firmware.
+    
+    Payload is minimized for firmware: nodes include id/x/y; edges include from/to.
+    """
+    
+    
+
+    base_dir = pathlib.Path(__file__).parent.parent.parent.parent
+    data_dir = base_dir / "data"
+    maps_dir = data_dir / "maps"
+
+    map_path = maps_dir / f"{body.map_id}.json"
+    if not map_path.exists():
+        raise HTTPException(status_code=404, detail="Map not found")
+
+    try:
+        with open(map_path, "r", encoding="utf-8") as f:
+            raw_map = json.load(f)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to read map: {exc}")
+
+    nodes = raw_map.get("nodes")
+    edges = raw_map.get("edges")
+    if not isinstance(nodes, list) or not isinstance(edges, list):
+        raise HTTPException(status_code=400, detail="Invalid map schema (nodes/edges)")
+
+    node_ids: set[str] = set()
+    fw_nodes: list[dict] = []
+    for n in nodes:
+        if not isinstance(n, dict):
+            continue
+        node_id = n.get("id")
+        if not node_id:
+            continue
+        try:
+            x = float(n.get("x", 0.0))
+            y = float(n.get("y", 0.0))
+        except Exception:
+            raise HTTPException(status_code=400, detail=f"Invalid node coordinates for {node_id}")
+        node_ids.add(str(node_id))
+        fw_nodes.append({"id": str(node_id), "x": x, "y": y})
+
+    if body.start_node_id not in node_ids:
+        raise HTTPException(status_code=400, detail="start_node_id not found in map nodes")
+
+    fw_edges: list[dict] = []
+    for e in edges:
+        if not isinstance(e, dict):
+            continue
+        # Web UI uses from/to; older schemas may use source/target
+        from_id = e.get("from") or e.get("source")
+        to_id = e.get("to") or e.get("target")
+        if not from_id or not to_id:
+            continue
+        from_id = str(from_id)
+        to_id = str(to_id)
+        if from_id not in node_ids or to_id not in node_ids:
+            # Skip edges that reference missing nodes
+            continue
+        fw_edges.append({"from": from_id, "to": to_id})
+
+    firmware_payload = {
+        "command": "LOAD_MAP",
+        "map_id": body.map_id,
+        "start_node_id": body.start_node_id,
+        "nodes": fw_nodes,
+        "edges": fw_edges,
+        "source": "backend_api",
+    }
+
+    return await send_command_to_car(request, firmware_payload)
 
 @router.post("/command")
 async def send_command(request: Request, command: CarCommand) -> dict:
