@@ -19,6 +19,13 @@ struct AppConfig {
   uint32_t frameIntervalMs;
   int jpegQuality;
 
+  // New fields
+  String frameSize;        // "QQVGA", "QVGA", "VGA"
+  uint32_t xclkFreqHz;     // 10000000 hoặc 20000000
+  int fbCount;             // 1 hoặc 2
+  String grabMode;         // "WHEN_EMPTY" hoặc "LATEST"
+  bool cameraDiagEnabled;  // true/false
+
   bool valid;  // populated by isAppConfigValid()
 };
 

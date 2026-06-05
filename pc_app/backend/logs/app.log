@@ -1,0 +1,549 @@
+2026-06-04 16:41:39,261 - on - ERROR - Traceback (most recent call last):
+  File "D:\AA\IOT\project\smart_car\pc_app\backend\app\main.py", line 140, in lifespan
+    logger("Building face recognition cache...")
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'Logger' object is not callable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\starlette\routing.py", line 694, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AA\IOT\project\smart_car\pc_app\backend\app\main.py", line 144, in lifespan
+    logger(f"Error building face cache: {e}")
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'Logger' object is not callable
+
+2026-06-04 16:41:39,262 - on - ERROR - Application startup failed. Exiting.
+2026-06-04 16:43:38,377 - on - ERROR - Traceback (most recent call last):
+  File "D:\AA\IOT\project\smart_car\pc_app\backend\app\main.py", line 141, in lifespan
+    logger("Building face recognition cache...")
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'Logger' object is not callable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\starlette\routing.py", line 694, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AA\IOT\project\smart_car\pc_app\backend\app\main.py", line 145, in lifespan
+    logger(f"Error building face cache: {e}")
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'Logger' object is not callable
+
+2026-06-04 16:43:38,378 - on - ERROR - Application startup failed. Exiting.
+2026-06-04 16:44:24,055 - on - ERROR - Traceback (most recent call last):
+  File "D:\AA\IOT\project\smart_car\pc_app\backend\app\main.py", line 140, in lifespan
+    logger("Building face recognition cache...")
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'Logger' object is not callable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\starlette\routing.py", line 694, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AA\IOT\project\smart_car\pc_app\backend\app\main.py", line 144, in lifespan
+    logger(f"Error building face cache: {e}")
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'Logger' object is not callable
+
+2026-06-04 16:44:24,056 - on - ERROR - Application startup failed. Exiting.
+2026-06-04 16:48:21,273 - on - ERROR - Traceback (most recent call last):
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\starlette\routing.py", line 694, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AA\IOT\project\smart_car\pc_app\backend\app\main.py", line 147, in lifespan
+    if settings.enable_person_detection and person_detection_service:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\pydantic\main.py", line 1042, in __getattr__
+    raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+AttributeError: 'Settings' object has no attribute 'enable_person_detection'
+
+2026-06-04 16:48:21,274 - on - ERROR - Application startup failed. Exiting.
+2026-06-04 16:48:39,759 - on - ERROR - Traceback (most recent call last):
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\starlette\routing.py", line 694, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AA\IOT\project\smart_car\pc_app\backend\app\main.py", line 147, in lifespan
+    if settings.enable_person_detection and person_detection_service:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS-PRO\AppData\Roaming\Python\Python313\site-packages\pydantic\main.py", line 1042, in __getattr__
+    raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+AttributeError: 'Settings' object has no attribute 'enable_person_detection'
+
+2026-06-04 16:48:39,759 - on - ERROR - Application startup failed. Exiting.
+2026-06-05 05:02:35,650 - httptools_impl - WARNING - Invalid HTTP request received.
+2026-06-05 05:02:52,388 - httptools_impl - WARNING - Invalid HTTP request received.
+2026-06-05 05:02:59,455 - httptools_impl - WARNING - Invalid HTTP request received.
+2026-06-05 05:31:47,575 - httptools_impl - WARNING - Invalid HTTP request received.
+2026-06-05 05:48:06,390 - httptools_impl - WARNING - Invalid HTTP request received.
+2026-06-05 12:12:50,252 - server - ERROR - [Errno 10048] error while attempting to bind on address ('0.0.0.0', 8000): [winerror 10048] only one usage of each socket address (protocol/network address/port) is normally permitted

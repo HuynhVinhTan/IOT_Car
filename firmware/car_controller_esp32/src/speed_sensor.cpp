@@ -2,15 +2,12 @@
 
 #include "pin_config.h"
 
-SpeedSensor* SpeedSensor::activeInstance_ = nullptr;
-
 SpeedSensor::SpeedSensor(int sensorPin) : sensorPin_(sensorPin) {}
 
 void SpeedSensor::begin() {
-  activeInstance_ = this;
   pinMode(sensorPin_, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(sensorPin_), handlePulseInterrupt,
-                  RISING);
+  attachInterruptArg(digitalPinToInterrupt(sensorPin_), handlePulseInterrupt, this,
+                     RISING);
   lastSampleMs_ = millis();
 }
 
@@ -39,8 +36,9 @@ float SpeedSensor::speedValue() const {
   return latestSpeedValue_;
 }
 
-void IRAM_ATTR SpeedSensor::handlePulseInterrupt() {
-  if (activeInstance_ != nullptr) {
-    activeInstance_->pulseCount_++;
+void IRAM_ATTR SpeedSensor::handlePulseInterrupt(void* arg) {
+  SpeedSensor* instance = static_cast<SpeedSensor*>(arg);
+  if (instance != nullptr) {
+    instance->pulseCount_++;
   }
 }

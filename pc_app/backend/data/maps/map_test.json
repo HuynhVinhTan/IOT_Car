@@ -1,0 +1,35 @@
+{
+  "id": "map_test",
+  "name": "Test Map",
+  "width": 1000,
+  "height": 700,
+  "nodes": [
+    {
+      "id": "home",
+      "label": "Home",
+      "x": 100,
+      "y": 100,
+      "type": "home"
+    },
+    {
+      "id": "target",
+      "label": "Target",
+      "x": 300,
+      "y": 100,
+      "type": "target"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_1",
+      "from": "home",
+      "to": "target",
+      "bidirectional": true,
+      "distance": 120
+    }
+  ],
+  "metadata": {
+    "unit": "cm",
+    "created_by": "web_ui"
+  }
+}

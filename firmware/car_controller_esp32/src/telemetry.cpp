@@ -30,6 +30,14 @@ void TelemetryPublisher::publishTelemetry(const CarTelemetry& carTelemetry) {
   telemetryDocument["battery_percent"] = carTelemetry.batteryPercent;
   telemetryDocument["left_motor_speed"] = carTelemetry.leftMotorSpeed;
   telemetryDocument["right_motor_speed"] = carTelemetry.rightMotorSpeed;
+  telemetryDocument["left_speed_value"] = carTelemetry.leftSpeedValue;
+  telemetryDocument["right_speed_value"] = carTelemetry.rightSpeedValue;
+  telemetryDocument["desired_left_motor_speed"] = carTelemetry.desiredLeftMotorSpeed;
+  telemetryDocument["desired_right_motor_speed"] = carTelemetry.desiredRightMotorSpeed;
+  telemetryDocument["effective_left_motor_speed"] = carTelemetry.effectiveLeftMotorSpeed;
+  telemetryDocument["effective_right_motor_speed"] = carTelemetry.effectiveRightMotorSpeed;
+  telemetryDocument["safety_override_active"] = carTelemetry.forwardUnsafe || carTelemetry.backwardUnsafe;
+  telemetryDocument["remote_command_timed_out"] = carTelemetry.remoteCommandTimedOut;
 
   if (carTelemetry.distanceValid) {
     telemetryDocument["distance_cm"] = carTelemetry.distanceCm;
@@ -37,7 +45,6 @@ void TelemetryPublisher::publishTelemetry(const CarTelemetry& carTelemetry) {
     telemetryDocument["distance_cm"] = nullptr;
   }
 
-  telemetryDocument["speed_value"] = carTelemetry.speedValue;
   telemetryDocument["obstacle_detected"] = carTelemetry.obstacleDetected;
   
   // Distances

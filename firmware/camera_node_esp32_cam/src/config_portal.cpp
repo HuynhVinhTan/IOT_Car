@@ -43,10 +43,41 @@ button{margin-top:18px;padding:10px 20px;font-size:16px;cursor:pointer}
 <input name="cam_token" type="password" required>
 
 <label>Frame Interval (ms)</label>
-<input name="frame_ms" type="number" value="64" min="50" max="1000">
+<input name="frame_ms" type="number" value="180" min="100" max="1000">
 
-<label>JPEG Quality (6-20, lower=better)</label>
-<input name="jpeg_q" type="number" value="8" min="6" max="20">
+<label>JPEG Quality (6-30)</label>
+<input name="jpeg_q" type="number" value="12" min="6" max="30">
+
+<label>Frame Size</label>
+<select name="frame_size">
+  <option value="QQVGA">QQVGA - safest</option>
+  <option value="QVGA" selected>QVGA - recommended</option>
+  <option value="VGA">VGA - sharper but heavier</option>
+</select>
+
+<label>XCLK Frequency</label>
+<select name="xclk_hz">
+  <option value="10000000" selected>10MHz - stable</option>
+  <option value="20000000">20MHz - faster</option>
+</select>
+
+<label>Frame Buffer Count</label>
+<select name="fb_count">
+  <option value="1" selected>1 - stable</option>
+  <option value="2">2 - faster with PSRAM</option>
+</select>
+
+<label>Grab Mode</label>
+<select name="grab_mode">
+  <option value="WHEN_EMPTY" selected>WHEN_EMPTY - stable</option>
+  <option value="LATEST">LATEST - realtime</option>
+</select>
+
+<label>Camera Diagnostic</label>
+<select name="cam_diag">
+  <option value="0" selected>Off</option>
+  <option value="1">On - run one capture test after init</option>
+</select>
 
 <button type="submit">Save & Restart</button>
 </form>
@@ -93,6 +124,12 @@ void startConfigPortal(const char *apSsid) {
     cfg.cameraToken     = server.arg("cam_token");
     cfg.frameIntervalMs = (uint32_t)server.arg("frame_ms").toInt();
     cfg.jpegQuality     = server.arg("jpeg_q").toInt();
+    
+    cfg.frameSize       = server.arg("frame_size");
+    cfg.xclkFreqHz      = (uint32_t)server.arg("xclk_hz").toInt();
+    cfg.fbCount         = server.arg("fb_count").toInt();
+    cfg.grabMode        = server.arg("grab_mode");
+    cfg.cameraDiagEnabled = server.arg("cam_diag") == "1";
 
     if (!isAppConfigValid(cfg)) {
       server.send(400, "text/html",

@@ -3,6 +3,7 @@
 #include <WiFi.h>
 #include <WebSocketsClient.h>
 #include "car_types.h"
+#include "app_config.h"
 #include "engine.h"
 #include "distance_sensor_array.h"
 #include "cliff_sensor_array.h"
@@ -14,15 +15,15 @@
 #include "telemetry.h"
 #include "safety_guard.h"
 
-class CarController {
+class  CarController {
  public:
   CarController();
   void begin();
   void update();
 
  private:
-  void setupWiFi();
-  void setupWebsocket();
+  void setupWiFi(const AppConfig& config);
+  void setupWebsocket(const AppConfig& config);
   void onWebsocketEvent(WStype_t type, uint8_t * payload, size_t length);
   void handleCommand(const ParsedCommand& parsedCommand);
   void handleSetModeCommand(DriveMode requestedMode);
@@ -49,7 +50,8 @@ class CarController {
   Engine* engine_;
   DistanceSensorArray* distanceSensorArray_;
   CliffSensorArray* cliffSensorArray_;
-  SpeedSensor* speedSensor_;
+  SpeedSensor* leftSpeedSensor_;
+  SpeedSensor* rightSpeedSensor_;
   LocalStatusButton* localStatusButton_;
   BatteryMonitor* batteryMonitor_;
   LcdDisplay* lcdDisplay_;
@@ -62,7 +64,8 @@ class CarController {
   SafetyStatus latestSafetyStatus_;
   DistanceReadings latestDistanceReadings_;
   CliffReadings latestCliffReadings_;
-  MotorSpeeds latestRemoteMotorSpeeds_;
+  MotorSpeeds desiredMotorSpeeds_;
+  MotorSpeeds effectiveMotorSpeeds_;
   String emergencyStopReason_;
   String controlSource_ = "NONE";
   bool personDetectedByAi_ = false;
@@ -77,5 +80,7 @@ class CarController {
   unsigned long lastSensorReadMs_ = 0;
   unsigned long lastCommandMs_ = 0;
   unsigned long lastRemoteDriveCommandMs_ = 0;
+  unsigned long modeHoldStartTime_ = 0;
+  bool modeHoldTriggered_ = false;
 };
 

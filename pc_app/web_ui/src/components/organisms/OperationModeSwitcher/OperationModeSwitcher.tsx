@@ -7,6 +7,7 @@ export type DashboardMode =
   | "localization_assist"
   | "training_recording"
   | "face_recognition"
+  | "map_editor"
   | "diagnostics";
 
 interface OperationModeSwitcherProps {
@@ -14,9 +15,9 @@ interface OperationModeSwitcherProps {
   onModeChange: (mode: DashboardMode) => void;
 }
 
-export function OperationModeSwitcher({ 
-  activeMode, 
-  onModeChange 
+export function OperationModeSwitcher({
+  activeMode,
+  onModeChange,
 }: OperationModeSwitcherProps) {
   const modes: { id: DashboardMode; label: string }[] = [
     { id: "overview", label: "Overview" },
@@ -25,6 +26,7 @@ export function OperationModeSwitcher({
     { id: "localization_assist", label: "Localization Assist" },
     { id: "training_recording", label: "Training" },
     { id: "face_recognition", label: "Face Recognition" },
+    { id: "map_editor", label: "Map Editor" },
     { id: "diagnostics", label: "Diagnostics" },
   ];
 

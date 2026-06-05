@@ -15,6 +15,8 @@ import { DetectionEventsPanel } from "../DetectionEventsPanel/DetectionEventsPan
 import { JoystickAlertPanel } from "../JoystickAlertPanel/JoystickAlertPanel";
 import { RobotLocationPanel } from "../RobotLocationPanel/RobotLocationPanel";
 import { BatteryStatusPanel } from "../BatteryStatusPanel/BatteryStatusPanel";
+import { CarModeControlPanel } from "../CarModeControlPanel/CarModeControlPanel";
+import { MapEditorPanel } from "../MapEditorPanel/MapEditorPanel";
 
 interface ModePanelSwitcherProps {
   activeMode: DashboardMode;
@@ -31,6 +33,7 @@ interface ModePanelSwitcherProps {
   cancelSegment: () => void;
   autoInfer: () => void;
   refreshSegments: () => void;
+  onRefreshStatus?: () => void;
 }
 
 export function ModePanelSwitcher({
@@ -47,14 +50,20 @@ export function ModePanelSwitcher({
   selectSegment,
   cancelSegment,
   autoInfer,
-  refreshSegments
+  refreshSegments,
+  onRefreshStatus,
 }: ModePanelSwitcherProps) {
   switch (activeMode) {
     case "overview":
       return (
         <>
-          <SystemOverviewPanel 
-            carTelemetry={carTelemetry} 
+          <CarModeControlPanel
+            carConnected={carConnected}
+            currentMode={carTelemetry?.mode || "UNKNOWN"}
+            onRefreshStatus={onRefreshStatus}
+          />
+          <SystemOverviewPanel
+            carTelemetry={carTelemetry}
             carConnected={carConnected}
             joystickConnected={joystickConnected}
           />
@@ -66,9 +75,9 @@ export function ModePanelSwitcher({
     case "manual_remote":
       return (
         <>
-          <RemoteControlPanel joystickTelemetry={joystickTelemetry} />
-          <JoystickStatusPanel joystickTelemetry={joystickTelemetry} /> 
-          <JoystickAlertPanel 
+          <RemoteControlPanel />
+          <JoystickStatusPanel joystickTelemetry={joystickTelemetry} />
+          <JoystickAlertPanel
             onStopAlert={onStopSiren}
             onTestAlert={() => {}} // Not needed here if we only want stop
             joystickTelemetry={joystickTelemetry}
@@ -85,7 +94,7 @@ export function ModePanelSwitcher({
     case "localization_assist":
       return (
         <>
-          <LocalizationAssistPanel 
+          <LocalizationAssistPanel
             segments={segments}
             selection={selection}
             loading={false}
@@ -112,6 +121,8 @@ export function ModePanelSwitcher({
           <AiStatusPanel />
         </>
       );
+    case "map_editor":
+      return <MapEditorPanel />;
     case "diagnostics":
       return (
         <>
@@ -119,8 +130,8 @@ export function ModePanelSwitcher({
           <BatteryStatusPanel carTelemetry={carTelemetry} />
           <RobotLocationPanel carTelemetry={carTelemetry} />
           <TelemetryPanel carTelemetry={carTelemetry} />
-          <DetectionEventsPanel 
-            events={events} 
+          <DetectionEventsPanel
+            events={events}
             detectionState={carTelemetry?.mission_state?.detection_state}
             onStopSiren={onStopSiren}
           />

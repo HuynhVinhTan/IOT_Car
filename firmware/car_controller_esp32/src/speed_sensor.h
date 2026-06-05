@@ -11,13 +11,11 @@ class SpeedSensor {
   float speedValue() const;
 
  private:
-  static void IRAM_ATTR handlePulseInterrupt();
+  static void IRAM_ATTR handlePulseInterrupt(void* arg);
 
   int sensorPin_;
   volatile unsigned long pulseCount_ = 0;
   unsigned long lastSampleMs_ = 0;
   unsigned long lastPulseCount_ = 0;
   float latestSpeedValue_ = 0.0F;
-
-  static SpeedSensor* activeInstance_;
 };

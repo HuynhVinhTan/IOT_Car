@@ -4,19 +4,18 @@
 // HC-SR04 ECHO 5V must be divided to 3.3V before entering GPIO34/35.
 // L298N GND must be common with ESP32 GND.
 
-// Ultrasonic Sensors
+// Ultrasonic Sensors (HC-SR04 Echo 5V must be divided to 3.3V)
 constexpr int RIGHT_ULTRASONIC_TRIG_PIN = 23;
 constexpr int RIGHT_ULTRASONIC_ECHO_PIN = 35;
 constexpr int LEFT_ULTRASONIC_TRIG_PIN = 22;
 constexpr int LEFT_ULTRASONIC_ECHO_PIN = 34;
-constexpr int FRONT_ULTRASONIC_TRIG_PIN = 22; // Alias
-constexpr int FRONT_ULTRASONIC_ECHO_PIN = 34; // Alias
-constexpr int REAR_ULTRASONIC_TRIG_PIN = 23;  // Alias
-constexpr int REAR_ULTRASONIC_ECHO_PIN = 35;  // Alias
+constexpr int FRONT_ULTRASONIC_TRIG_PIN = 18;
+constexpr int FRONT_ULTRASONIC_ECHO_PIN = 14;
 
 // L298N Motor Driver
 // ENA/ENB must have jumpers removed if using PWM
-constexpr int LEFT_MOTOR_ENA_PIN = 18;
+// GPIO2 is a boot strap pin, ENA usage may affect boot
+constexpr int LEFT_MOTOR_ENA_PIN = 2;
 constexpr int LEFT_MOTOR_IN1_PIN = 32;
 constexpr int LEFT_MOTOR_IN2_PIN = 33;
 
@@ -31,6 +30,7 @@ constexpr int SPEED_SENSOR_LEFT_PIN = 27;
 // Other peripherals
 constexpr int BATTERY_ADC_PIN = 36;
 constexpr int MODE_BUTTON_PIN = 21;
+constexpr int MODE_HOLD_BUTTON_PIN = 4;
 constexpr int LOCAL_STATUS_BUTTON_PIN = 0; // BOOT button
 constexpr int LCD_SDA_PIN = 4;
 constexpr int LCD_SCL_PIN = 5;
@@ -78,6 +78,7 @@ constexpr long LOCAL_BUTTON_DEBOUNCE_MS = 50;
 constexpr long LOCAL_BUTTON_LONG_PRESS_MS = 2000;
 constexpr long MODE_BUTTON_DEBOUNCE_MS = 50;
 constexpr long MODE_BUTTON_LONG_PRESS_MS = 2000;
+constexpr unsigned long MODE_HOLD_THRESHOLD_MS = 1500;
 
 // WiFi and Backend Settings
 constexpr char WIFI_SSID[] = "Your_WiFi_SSID";

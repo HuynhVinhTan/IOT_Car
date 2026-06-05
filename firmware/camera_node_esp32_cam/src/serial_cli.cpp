@@ -4,17 +4,13 @@
 
 #include <Arduino.h>
 
-// ---------------------------------------------------------------------------
 // Internal state
-// ---------------------------------------------------------------------------
 static String s_lineBuffer;
 
 // Pending changes accumulate here; written to NVS on "save" command
 static AppConfig *s_cfg = nullptr;
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 static void printHelp() {
   Serial.println("=== Serial CLI (dev mode) ===");
   Serial.println("  show");
@@ -119,9 +115,7 @@ static void handleLine(const String &line, AppConfig &cfg) {
   }
 }
 
-// ---------------------------------------------------------------------------
 // Public API
-// ---------------------------------------------------------------------------
 void serialCliBegin(AppConfig &config) {
   s_cfg = &config;
   Serial.println("[CLI] Serial CLI ready (dev mode). Type 'help'.");

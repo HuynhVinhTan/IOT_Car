@@ -137,20 +137,20 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # 1. Build Face Recognition Cache
     try:
         async with AsyncSessionLocal() as session:
-            logger("Building face recognition cache...")
+            logger.info("Building face recognition cache...")
             await face_recognition_service.build_cache(session)
-            logger("Face recognition cache built successfully.")
-    except Exception as e:
-        logger(f"Error building face cache: {e}")
+            logger.info("Face recognition cache built successfully.")
+    except Exception:
+        logger.exception("Error building face cache")
     
     # 2. Initialize Person Detection (Lazy Load)
-    if settings.enable_person_detection and person_detection_service:
+    if getattr(settings, "enable_person_detection", False) and person_detection_service:
         try:
-            logger("Initializing YOLO model...")
+            logger.info("Initializing YOLO model...")
             await asyncio.to_thread(person_detection_service.initialize)
-            logger("YOLO model initialized.")
-        except Exception as e:
-            logger(f"Error initializing YOLO: {e}")
+            logger.info("YOLO model initialized.")
+        except Exception:
+            logger.exception("Error initializing YOLO")
 
     event_loop = asyncio.get_running_loop()
 
@@ -188,8 +188,20 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                         "type": "target_tracking_result",
                         **result.dict()
                     })
+                    # If person/target detected, broadcast detection event
+                    if result.get("object_found"):
+                        await connection_manager.broadcast_json({
+                            "type": "detection_event",
+                            "object_found": True,
+                            "object_type": result.get("object_type", "unknown"),
+                            "confidence": result.get("confidence", 0),
+                            "detected_node": result.get("current_node"),
+                            "detected_segment_id": result.get("current_segment_id"),
+                            "display_name": result.get("display_name"),
+                            "timestamp": result.get("timestamp")
+                        })
             except Exception as e:
-                logger(f"Vision worker error: {e}")
+                logger.exception(f"Vision worker error: {e}")
             await asyncio.sleep(0.2) # 5 FPS
 
     vision_task = asyncio.create_task(vision_worker())
@@ -202,7 +214,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         watchdog_task = asyncio.create_task(remote_safety_watchdog())
         app.state.remote_safety_watchdog_task = watchdog_task
     else:
-        logger("Robot control disabled. Skipping serial clients and watchdog.")
+        logger.info("Robot control disabled. Skipping serial clients and watchdog.")
 
     try:
         yield
@@ -286,27 +298,24 @@ async def telemetry_socket(websocket: WebSocket) -> None:
 
 @app.websocket("/ws/car")
 async def websocket_car_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    logger("Car connected via WebSocket")
+    car_token = settings.car_controller_token if hasattr(settings, 'car_controller_token') else None
+    car_id = settings.car_controller_id if hasattr(settings, 'car_controller_id') else None
     
-    # Setup command push
-    async def send_to_car(payload: dict):
-        try:
-            await websocket.send_json(payload)
-        except Exception:
-            pass
-            
-    # Link car control service to this websocket
-    # Note: For simplicity in MVP, we assume only one car connects
-    app.state.car_control_service.set_command_callback(
-        lambda p: asyncio.create_task(send_to_car(p))
-    )
+    await websocket.accept()
+    app.state.car_ws = websocket
+    app.state.car_ws_connected = True
+    app.state.car_id = car_id or "car_controller_01"
+    
+    logger.info(f"Car connected via WebSocket (ID: {app.state.car_id})")
     
     try:
         while True:
             data = await websocket.receive_json()
             # Handle incoming telemetry/events from car
             if data.get("type") == "car_telemetry":
+                # Ensure car_id is set
+                if "car_id" not in data:
+                    data["car_id"] = app.state.car_id
                 app.state.telemetry_service.update_telemetry(data)
                 # Broadcast to dashboard
                 await app.state.connection_manager.broadcast_json(data)
@@ -314,11 +323,12 @@ async def websocket_car_endpoint(websocket: WebSocket):
                 # Log or handle events
                 await app.state.connection_manager.broadcast_json(data)
     except WebSocketDisconnect:
-        logger("Car disconnected")
-        app.state.car_control_service.set_command_callback(None)
+        logger.info("Car disconnected")
     except Exception as e:
-        logger(f"Car WS Error: {e}")
-        app.state.car_control_service.set_command_callback(None)
+        logger.exception("Car WS Error")
+    finally:
+        app.state.car_ws = None
+        app.state.car_ws_connected = False
 
 
 

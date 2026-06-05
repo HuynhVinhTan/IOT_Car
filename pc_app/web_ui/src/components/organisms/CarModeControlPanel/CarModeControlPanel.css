@@ -1,0 +1,107 @@
+.car-mode-control {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.status-indicators {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  background-color: var(--surface-light);
+  border-radius: 8px;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.status-badge.connected {
+  background-color: var(--success-bg, #d4edda);
+  color: var(--success-text, #155724);
+}
+
+.status-badge.offline {
+  background-color: var(--danger-bg, #f8d7da);
+  color: var(--danger-text, #721c24);
+}
+
+.mode-badge {
+  font-size: 14px;
+}
+
+.error-message {
+  color: var(--danger-text, #721c24);
+  background-color: var(--danger-bg, #f8d7da);
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.offline-warning {
+  color: #856404;
+  background-color: #fff3cd;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.control-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.control-buttons .btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition:
+    opacity 0.2s,
+    transform 0.1s;
+  flex: 1 1 45%;
+}
+
+.control-buttons .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.control-buttons .btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background-color: var(--primary-color, #007bff);
+  color: white;
+}
+
+.btn-success {
+  background-color: var(--success-color, #28a745);
+  color: white;
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color, #6c757d);
+  color: white;
+}
+
+.btn-danger {
+  background-color: var(--danger-color, #dc3545);
+  color: white;
+}
+
+.btn-warning {
+  background-color: var(--warning-color, #ffc107);
+  color: #212529;
+}

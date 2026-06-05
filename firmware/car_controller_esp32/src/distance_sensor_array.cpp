@@ -9,19 +9,17 @@ DistanceSensorArray::DistanceSensorArray()
                   ENABLE_LEFT_ULTRASONIC),
       rightSensor_(RIGHT_ULTRASONIC_TRIG_PIN, RIGHT_ULTRASONIC_ECHO_PIN,
                    ENABLE_RIGHT_ULTRASONIC),
-      rearSensor_(REAR_ULTRASONIC_TRIG_PIN, REAR_ULTRASONIC_ECHO_PIN,
-                  ENABLE_REAR_ULTRASONIC) {
+      rearSensor_(0, 0, false) {
   latestReadings_.frontEnabled = ENABLE_FRONT_ULTRASONIC;
   latestReadings_.leftEnabled = ENABLE_LEFT_ULTRASONIC;
   latestReadings_.rightEnabled = ENABLE_RIGHT_ULTRASONIC;
-  latestReadings_.rearEnabled = ENABLE_REAR_ULTRASONIC;
+  latestReadings_.rearEnabled = false;
 }
 
 void DistanceSensorArray::begin() {
   frontSensor_.begin();
   leftSensor_.begin();
   rightSensor_.begin();
-  rearSensor_.begin();
 }
 
 void DistanceSensorArray::update(unsigned long currentTimeMs) {

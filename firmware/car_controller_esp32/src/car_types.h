@@ -197,7 +197,13 @@ struct CarTelemetry {
   unsigned long timestampMs = 0;
   int leftMotorSpeed = 0;
   int rightMotorSpeed = 0;
-  float speedValue = 0.0F;
+  float leftSpeedValue = 0.0F;
+  float rightSpeedValue = 0.0F;
+  int desiredLeftMotorSpeed = 0;
+  int desiredRightMotorSpeed = 0;
+  int effectiveLeftMotorSpeed = 0;
+  int effectiveRightMotorSpeed = 0;
+  bool remoteCommandTimedOut = false;
   float distanceCm = 0.0F;
   bool distanceValid = false;
   DistanceReadings distanceReadings;
