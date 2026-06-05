@@ -33,3 +33,14 @@ export async function setCarMode(mode: DriveMode | string) {
   }
   return res;
 }
+
+export async function loadMapToCar(mapId: string, startNodeId: string) {
+  const res: any = await apiRequest("/api/car/load-map", {
+    method: "POST",
+    body: JSON.stringify({ map_id: mapId, start_node_id: startNodeId }),
+  });
+  if (res && res.ok === false) {
+    throw new Error(res.reason || "Failed to load map to car");
+  }
+  return res;
+}

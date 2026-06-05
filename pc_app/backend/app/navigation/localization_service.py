@@ -47,6 +47,39 @@ class LocalizationService:
                     
         return self.snapshot()
 
+    def set_start_position(self, segment_id: str, offset_pct: float) -> dict:
+        """
+        Tell the backend the robot is somewhere along `segment_id`,
+        at `offset_pct` (0.0 = from_node, 1.0 = to_node).
+        Returns a dict with remaining_pct and target_node so the caller
+        knows how far is left to the segment's to_node.
+        """
+        offset_pct = max(0.0, min(1.0, offset_pct))
+        segments = {s["segment_id"]: s for s in self._map_graph.get_segments()}
+        seg = segments.get(segment_id)
+        if not seg:
+            return {"ok": False, "reason": "Segment not found"}
+
+        self.current_segment = segment_id
+        self.current_node = "UNKNOWN"          # mid-segment → not at a node yet
+        self.progress_ratio = offset_pct
+        self.target_node = seg["to_node"]
+        self.position_source = "manual_offset"
+
+        remaining_pct = round(1.0 - offset_pct, 4)
+        pixel_dist = self._map_graph.segment_pixel_distance(segment_id)
+
+        return {
+            "ok": True,
+            "segment_id": segment_id,
+            "from_node": seg["from_node"],
+            "to_node": seg["to_node"],
+            "offset_pct": offset_pct,
+            "remaining_pct": remaining_pct,
+            "segment_pixel_distance": pixel_dist,
+            "remaining_pixel_distance": round(pixel_dist * remaining_pct, 2) if pixel_dist else None,
+        }
+
     def get_robot_position(self) -> dict[str, Any]:
         import time
         return {

@@ -547,3 +547,299 @@ AttributeError: 'Settings' object has no attribute 'enable_person_detection'
 2026-06-05 05:31:47,575 - httptools_impl - WARNING - Invalid HTTP request received.
 2026-06-05 05:48:06,390 - httptools_impl - WARNING - Invalid HTTP request received.
 2026-06-05 12:12:50,252 - server - ERROR - [Errno 10048] error while attempting to bind on address ('0.0.0.0', 8000): [winerror 10048] only one usage of each socket address (protocol/network address/port) is normally permitted
+2026-06-05 21:53:02,717 - httptools_impl - ERROR - Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 420, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\fastapi\applications.py", line 1163, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\middleware\cors.py", line 87, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\fastapi\routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\fastapi\routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\fastapi\routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\fastapi\routing.py", line 330, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\app\api\routes\route_segments.py", line 49, in set_start_position
+    return request.app.state.route_segment_service.set_start_position(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        payload.segment_id, payload.offset_pct
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\app\services\route_segment_service.py", line 166, in set_start_position
+    asyncio.create_task(self._run_mission_from_segment(segment_id, offset_pct))
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 407, in create_task
+    loop = events.get_running_loop()
+RuntimeError: no running event loop
+2026-06-05 21:55:01,747 - httptools_impl - ERROR - Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 420, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\fastapi\applications.py", line 1163, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\middleware\cors.py", line 87, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\fastapi\routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\fastapi\routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\fastapi\routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\fastapi\routing.py", line 330, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\app\api\routes\route_segments.py", line 49, in set_start_position
+    return request.app.state.route_segment_service.set_start_position(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        payload.segment_id, payload.offset_pct
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\app\services\route_segment_service.py", line 166, in set_start_position
+    asyncio.create_task(self._run_mission_from_segment(segment_id, offset_pct))
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 407, in create_task
+    loop = events.get_running_loop()
+RuntimeError: no running event loop
+2026-06-05 21:56:37,581 - on - ERROR - Traceback (most recent call last):
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 712, in run_until_complete
+    self.run_forever()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 683, in run_forever
+    self._run_once()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 2050, in _run_once
+    handle._run()
+    ~~~~~~~~~~~^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\uvicorn\server.py", line 78, in serve
+    with self.capture_signals():
+         ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\contextlib.py", line 148, in __exit__
+    next(self.gen)
+    ~~~~^^^^^^^^^^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\uvicorn\server.py", line 339, in capture_signals
+    signal.raise_signal(captured_signal)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\runners.py", line 157, in _on_sigint
+    raise KeyboardInterrupt()
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\routing.py", line 701, in lifespan
+    await receive()
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\uvicorn\lifespan\on.py", line 137, in receive
+    return await self.receive_queue.get()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\queues.py", line 186, in get
+    await getter
+asyncio.exceptions.CancelledError
+
+2026-06-05 21:56:44,028 - on - ERROR - Traceback (most recent call last):
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 712, in run_until_complete
+    self.run_forever()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 683, in run_forever
+    self._run_once()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 2050, in _run_once
+    handle._run()
+    ~~~~~~~~~~~^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\uvicorn\server.py", line 78, in serve
+    with self.capture_signals():
+         ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\contextlib.py", line 148, in __exit__
+    next(self.gen)
+    ~~~~^^^^^^^^^^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\uvicorn\server.py", line 339, in capture_signals
+    signal.raise_signal(captured_signal)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\runners.py", line 157, in _on_sigint
+    raise KeyboardInterrupt()
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\routing.py", line 701, in lifespan
+    await receive()
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\uvicorn\lifespan\on.py", line 137, in receive
+    return await self.receive_queue.get()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\queues.py", line 186, in get
+    await getter
+asyncio.exceptions.CancelledError
+
+2026-06-05 21:56:50,453 - on - ERROR - Traceback (most recent call last):
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 712, in run_until_complete
+    self.run_forever()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 683, in run_forever
+    self._run_once()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 2050, in _run_once
+    handle._run()
+    ~~~~~~~~~~~^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\uvicorn\server.py", line 78, in serve
+    with self.capture_signals():
+         ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\contextlib.py", line 148, in __exit__
+    next(self.gen)
+    ~~~~^^^^^^^^^^
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\uvicorn\server.py", line 339, in capture_signals
+    signal.raise_signal(captured_signal)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\runners.py", line 157, in _on_sigint
+    raise KeyboardInterrupt()
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\starlette\routing.py", line 701, in lifespan
+    await receive()
+  File "C:\Users\ADMIN\OneDrive - The University of Technology\Documents\Smartcar\IOT_Car\pc_app\backend\.venv\Lib\site-packages\uvicorn\lifespan\on.py", line 137, in receive
+    return await self.receive_queue.get()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\asyncio\queues.py", line 186, in get
+    await getter
+asyncio.exceptions.CancelledError
+

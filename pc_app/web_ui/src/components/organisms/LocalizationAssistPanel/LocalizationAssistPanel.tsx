@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card } from "../../atoms/Card/Card";
 import { RouteSegmentButton } from "../../molecules/RouteSegmentButton/RouteSegmentButton";
 import { SelectedSegmentBadge } from "../../molecules/SelectedSegmentBadge/SelectedSegmentBadge";
@@ -11,6 +12,7 @@ interface LocalizationAssistPanelProps {
   cancel: () => void;
   autoInfer: () => void;
   refreshData: () => void;
+  setStartPosition?: (segmentId: string, offsetPct: number) => void;
 }
 
 export function LocalizationAssistPanel({
@@ -20,8 +22,10 @@ export function LocalizationAssistPanel({
   select,
   cancel,
   autoInfer,
-  refreshData
+  refreshData,
+  setStartPosition,
 }: LocalizationAssistPanelProps) {
+  const [offsetPct, setOffsetPct] = useState(0);
 
   return (
     <Card title="Localization Assist">
@@ -83,6 +87,31 @@ export function LocalizationAssistPanel({
               style={{ padding: "8px 16px", background: "var(--bg-surface)", color: "var(--status-error)", border: "1px solid var(--status-error)", borderRadius: "4px", cursor: "pointer" }}
             >
               Cancel
+            </button>
+          </div>
+        )}
+
+        {/* ── Start-position block: shown when a segment is selected ── */}
+        {selection?.selected_segment_id && setStartPosition && (
+          <div style={{ marginTop: "8px", padding: "12px", background: "var(--bg-surface-hover)", borderRadius: "4px", display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+              Tôi đã đi được <strong>{offsetPct}%</strong> của đoạn <strong>{selection.selected_segment_id}</strong>
+              &nbsp;— còn lại <strong>{100 - offsetPct}%</strong> đến điểm tiếp theo.
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={99}
+              value={offsetPct}
+              onChange={(e) => setOffsetPct(Number(e.target.value))}
+              style={{ width: "100%", cursor: "pointer" }}
+            />
+            <button
+              onClick={() => setStartPosition(selection.selected_segment_id!, offsetPct / 100)}
+              disabled={loading}
+              style={{ padding: "8px", background: "var(--status-success, #28a745)", border: "none", color: "white", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", opacity: loading ? 0.5 : 1 }}
+            >
+              ▶ Bắt đầu chạy từ đây
             </button>
           </div>
         )}
