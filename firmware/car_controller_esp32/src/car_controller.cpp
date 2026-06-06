@@ -57,7 +57,7 @@ void CarController::begin() {
   leftSpeedSensor_->begin();
   rightSpeedSensor_->begin();
   localStatusButton_->begin();
-  lcdDisplay_->begin();
+  // lcdDisplay_->begin(); // Đã vô hiệu hóa LCD
 
   const unsigned long nowMs = millis();
   lastCommandMs_ = nowMs;
@@ -171,7 +171,11 @@ void CarController::hardwareUpdate() {
     }
   } else {
     modeHoldStartTime_ = 0;
-    modeHoldTriggered_ = false;
+    if (modeHoldTriggered_) {
+      // Tự động trả xe về IDLE khi nhả nút "cướp cò"
+      enterIdleMode("mode button released");
+      modeHoldTriggered_ = false;
+    }
   }
 
   if (currentDriveMode_ == DriveMode::EmergencyStop) {
@@ -303,7 +307,7 @@ void CarController::handleModeButtonLongPress() {
   if (currentDriveMode_ != DriveMode::EmergencyStop) {
     enterStatusDisplayMode("Long press: Status Display");
   } else {
-    lcdDisplay_->turnOn();
+    // lcdDisplay_->turnOn(); // Đã vô hiệu hóa LCD
   }
 }
 
@@ -320,6 +324,8 @@ void CarController::updateManualRemoteMode(unsigned long nowMs) {
   }
 
   effectiveMotorSpeeds_ = desiredMotorSpeeds_;
+  /*
+  // YÊU CẦU: Trong chế độ MANUAL, trao toàn quyền cho người lái, vô hiệu hóa cảm biến chặn
   if (safetyGuard_->shouldBlockForwardMotion() && motorSpeedsMoveForward(effectiveMotorSpeeds_)) {
     effectiveMotorSpeeds_.leftMotorSpeed = 0;
     effectiveMotorSpeeds_.rightMotorSpeed = 0;
@@ -328,6 +334,7 @@ void CarController::updateManualRemoteMode(unsigned long nowMs) {
     effectiveMotorSpeeds_.leftMotorSpeed = 0;
     effectiveMotorSpeeds_.rightMotorSpeed = 0;
   }
+  */
 
   engine_->setMotorSpeeds(effectiveMotorSpeeds_.leftMotorSpeed, effectiveMotorSpeeds_.rightMotorSpeed);
 }
@@ -337,6 +344,10 @@ void CarController::updateSensorsIfDue(unsigned long nowMs) {
 
   distanceSensorArray_->update(nowMs);
   latestDistanceReadings_ = distanceSensorArray_->getReadings();
+  
+  // Vô hiệu hóa Cliff Sensor
+  latestCliffReadings_ = CliffReadings(); 
+
   latestSafetyStatus_ = safetyGuard_->update(latestDistanceReadings_, latestCliffReadings_);
   lastSensorReadMs_ = nowMs;
 }
@@ -348,6 +359,8 @@ void CarController::publishTelemetryIfDue(unsigned long nowMs) {
 }
 
 void CarController::updateLocalDisplay(unsigned long nowMs) {
+  return; // Vô hiệu hóa hoàn toàn khối LCD và đọc pin (Battery)
+
   if (isRunningMode(currentDriveMode_)) {
     lcdDisplay_->turnOff();
     return;
@@ -385,7 +398,7 @@ void CarController::enterStatusDisplayMode(const String& reason) {
   effectiveMotorSpeeds_ = MotorSpeeds();
   controlSource_ = "STATUS";
   engine_->stop();
-  lcdDisplay_->turnOn();
+  // lcdDisplay_->turnOn(); // Đã vô hiệu hóa LCD
   if (reason.length() > 0) telemetryPublisher_->publishEvent("status", reason);
 }
 
@@ -435,10 +448,10 @@ CarTelemetry CarController::buildTelemetry(unsigned long nowMs) const {
   carTelemetry.personDetected = personDetectedByAi_;
   carTelemetry.emergencyStopReason = emergencyStopReason_;
   carTelemetry.controlSource = controlSource_;
-  carTelemetry.batteryVoltage = 0.0F;
+  carTelemetry.batteryVoltage = 0.0f; // Bỏ qua đọc batteryMonitor
   carTelemetry.batteryPercent = -1;
-  carTelemetry.lcdStatus = lcdDisplay_->status();
-  carTelemetry.lcdEnabled = lcdDisplay_->isEnabled();
+  carTelemetry.lcdStatus = ""; // Bỏ qua trạng thái LCD
+  carTelemetry.lcdEnabled = false;
   carTelemetry.currentNode = WiFi.localIP().toString(); // Use IP as node for now
   return carTelemetry;
 }

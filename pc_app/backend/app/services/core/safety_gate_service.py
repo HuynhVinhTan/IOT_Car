@@ -48,6 +48,10 @@ class SafetyGateService:
         if mode not in self.DRIVE_ALLOWED_MODES:
             return {"allowed": False, "reason": "MODE_NOT_ALLOWED", "mode": mode}
 
+        # YÊU CẦU: Vô hiệu hóa cảm biến chặn trên Backend khi ở chế độ MANUAL
+        if mode == "MANUAL_REMOTE":
+            return {"allowed": True, "reason": "SAFE_MANUAL_OVERRIDE"}
+
         left_pwm = payload.get("left_motor_speed", 0)
         right_pwm = payload.get("right_motor_speed", 0)
         moving_forward = command in {"MOVE_FORWARD"} or left_pwm > 0 or right_pwm > 0
