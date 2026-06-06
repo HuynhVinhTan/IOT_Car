@@ -72,6 +72,16 @@ class MapGraph:
         visited_count = len([node for node in available_nodes if node["visited"]])
         return visited_count / len(available_nodes)
 
+    def segment_pixel_distance(self, segment_id: str) -> float | None:
+        """Return Euclidean pixel distance for a segment, or None if not found."""
+        for seg in self.segments:
+            if seg["segment_id"] == segment_id:
+                a = self.nodes.get(seg["from_node"])
+                b = self.nodes.get(seg["to_node"])
+                if a and b:
+                    return ((b["x"] - a["x"]) ** 2 + (b["y"] - a["y"]) ** 2) ** 0.5
+        return None
+
     def to_dict(self) -> dict[str, Any]:
         return {"nodes": list(self.nodes.values()), "edges": self.edges}
 

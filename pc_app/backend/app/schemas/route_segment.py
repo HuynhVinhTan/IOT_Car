@@ -41,6 +41,12 @@ class SelectSegmentRequest(BaseModel):
     confirm_on_segment: bool = False
 
 
+class SetStartPositionRequest(BaseModel):
+    """User picks which segment the robot is on + how far along (0.0–1.0) from the `from_node`."""
+    segment_id: str
+    offset_pct: float  # 0.0 = at from_node, 1.0 = at to_node
+
+
 class HeadingHintRequest(BaseModel):
     segment_id: str
     heading_hint_x: float

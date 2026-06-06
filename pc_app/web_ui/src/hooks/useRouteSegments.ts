@@ -72,6 +72,15 @@ export function useRouteSegments() {
     }
   };
 
+  const setStartPosition = async (segmentId: string, offsetPct: number) => {
+    setLoading(true);
+    try {
+      await routeSegmentService.setStartPosition(segmentId, offsetPct);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     segments,
     selection,
@@ -82,6 +91,7 @@ export function useRouteSegments() {
     select,
     cancel,
     autoInfer,
-    setHint
+    setHint,
+    setStartPosition,
   };
 }

@@ -33,6 +33,7 @@ interface ModePanelSwitcherProps {
   cancelSegment: () => void;
   autoInfer: () => void;
   refreshSegments: () => void;
+  setStartPosition?: (segmentId: string, offsetPct: number) => void;
   onRefreshStatus?: () => void;
 }
 
@@ -51,6 +52,7 @@ export function ModePanelSwitcher({
   cancelSegment,
   autoInfer,
   refreshSegments,
+  setStartPosition,
   onRefreshStatus,
 }: ModePanelSwitcherProps) {
   switch (activeMode) {
@@ -102,6 +104,7 @@ export function ModePanelSwitcher({
             cancel={cancelSegment}
             autoInfer={autoInfer}
             refreshData={refreshSegments}
+            setStartPosition={setStartPosition}
           />
           <RouteGuidancePanel guidance={guidance} />
         </>

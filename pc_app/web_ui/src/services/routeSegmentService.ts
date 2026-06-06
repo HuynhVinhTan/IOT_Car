@@ -28,6 +28,13 @@ export const routeSegmentService = {
     return apiRequest<RouteSelectionState>("/api/routes/cancel-segment", { method: "POST" });
   },
 
+  setStartPosition: (segmentId: string, offsetPct: number): Promise<Record<string, unknown>> => {
+    return apiRequest<Record<string, unknown>>("/api/routes/set-start-position", {
+      method: "POST",
+      body: JSON.stringify({ segment_id: segmentId, offset_pct: offsetPct }),
+    });
+  },
+
   autoInfer: (): Promise<RouteSelectionState> => {
     return apiRequest<RouteSelectionState>("/api/routes/auto-infer", { method: "POST" });
   },

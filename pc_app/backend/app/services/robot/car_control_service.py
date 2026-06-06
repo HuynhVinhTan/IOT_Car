@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any
 
 from app.core.config import Settings
@@ -47,9 +48,38 @@ class CarControlService:
             
         return {"sent": True, "allowed": True, "status": "SENT", "payload": payload}
 
-
     def set_mode(self, mode: str) -> dict[str, Any]:
         return self.send_command({"command": "SET_MODE", "mode": mode})
+
+    # --- BƯỚC 3: THÊM LOG ĐỂ TEST ĐỘC LẬP TẠI ĐÂY ---
+    async def drive_timed(
+        self,
+        duration_ms: int,
+        left_speed: int = 160,
+        right_speed: int = 160,
+    ) -> None:
+        """
+        Put the car in MANUAL_REMOTE, pump REMOTE_DRIVE for `duration_ms`,
+        then send REMOTE_STOP. Designed to be awaited from an asyncio task.
+        """
+        # In ra Terminal Uvicorn để verify luồng tính toán thời gian từ API chuyển xuống
+        print(f"\n🚀 [TEST LOG] drive_timed() được gọi thành công!")
+        print(f"⏱️  Thời gian chạy dự kiến: {duration_ms} ms (left: {left_speed}, right: {right_speed})\n")
+
+        self.set_mode("MANUAL_REMOTE")
+        await asyncio.sleep(0.05)  # give ESP32 time to switch mode
+
+        deadline = asyncio.get_event_loop().time() + duration_ms / 1000.0
+        while asyncio.get_event_loop().time() < deadline:
+            self.send_command({
+                "command": "REMOTE_DRIVE",
+                "left_motor_speed": left_speed,
+                "right_motor_speed": right_speed,
+            })
+            await asyncio.sleep(0.08)  # ~12 Hz pump, within COMMAND_TIMEOUT_MS=1000
+
+        self.send_command({"command": "REMOTE_STOP"})
+        print(f"🛑 [TEST LOG] Hết thời gian {duration_ms}ms -> Đã gửi lệnh REMOTE_STOP dừng xe ngầm.")
 
     def handle_joystick_telemetry(self, joystick_telemetry: dict[str, Any]) -> None:
         car_telemetry = self._telemetry_service.latest_car_telemetry or {}

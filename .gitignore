@@ -21,3 +21,6 @@ doc_project/
 !.env.example
 migrations/
 .md
+# Runtime logs
+pc_app/backend/logs/*.log
+!pc_app/backend/logs/.gitkeep
