@@ -1,10 +1,9 @@
 #include <Arduino.h>
-#include "car_controller.h"
-
-CarController carController;
 
 void setup() {
-  carController.begin();
+  Serial.begin(115200);
+  delay(1000);
+  Serial.println("MINIMAL_BOOT_OK");
 }
 
 void loop() {

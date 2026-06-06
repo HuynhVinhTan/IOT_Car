@@ -1,4 +1,4 @@
-from typing import Optional, BinaryIO
+from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.media_asset import MediaAsset
 from app.repositories.training_repository import MediaAssetRepository
@@ -10,9 +10,9 @@ class MediaAssetService:
         self.repo = MediaAssetRepository(MediaAsset, db)
         self.cloud_service = CloudinaryMediaService()
 
-    async def upload_asset(self, file: BinaryIO, folder: str, purpose: str, filename: Optional[str] = None) -> MediaAsset:
+    async def upload_asset(self, image_bytes: bytes, folder: str, purpose: str, filename: Optional[str] = None) -> MediaAsset:
         # 1. Upload to Cloud/Local
-        result: MediaUploadResult = await self.cloud_service.upload_image(file, folder, filename)
+        result: MediaUploadResult = await self.cloud_service.upload_image(image_bytes, folder, filename)
         
         # 2. Record in DB
         asset = MediaAsset(

@@ -3,7 +3,7 @@ import uuid
 from typing import Optional, Any, cast, BinaryIO
 from dataclasses import dataclass
 
-from fastapi import UploadFile
+from io import BytesIO
 from starlette.concurrency import run_in_threadpool
 
 from app.core.config import settings
@@ -79,19 +79,21 @@ class CloudinaryMediaService:
 
     async def upload_image(
         self,
-        uploaded_file: UploadFile,
+        image_bytes: bytes,
         folder: str,
         filename: Optional[str] = None,
     ) -> MediaUploadResult:
+        file_stream = BytesIO(image_bytes)
+        
         if not self.enabled:
-            return await self._upload_local(uploaded_file.file, folder, filename)
+            return await self._upload_local(file_stream, folder, filename)
 
         try:
-            uploaded_file.file.seek(0)
+            file_stream.seek(0)
 
             upload_result = await run_in_threadpool(
                 self.upload_image_to_cloudinary,
-                uploaded_file.file,
+                file_stream,
                 upload_folder=f"{settings.cloudinary_upload_folder}/{folder}",
                 public_id=filename,
             )
@@ -111,7 +113,7 @@ class CloudinaryMediaService:
 
         except Exception as exc:
             logger.warning(f"Cloudinary upload failed: {exc}. Falling back to local.")
-            return await self._upload_local(uploaded_file.file, folder, filename)
+            return await self._upload_local(file_stream, folder, filename)
 
     async def _upload_local(
         self,

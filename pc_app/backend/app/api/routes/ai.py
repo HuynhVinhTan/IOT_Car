@@ -81,11 +81,15 @@ def _get_camera_connected(camera_service: Any) -> bool:
 
 def _get_remote_camera_connected(state: Any) -> bool:
     hub = getattr(state, "camera_frame_hub", None)
-    settings = getattr(state, "settings", None)
-    if hub is None or settings is None:
+    if hub is None:
         return False
-    status_payload = hub.get_status(settings.default_camera_id)
-    return bool(status_payload.get("publisher_connected") and status_payload.get("status") == "READY")
+    
+    # Check all cameras in the hub
+    for cid, state_obj in hub._states.items():
+        status_payload = hub.get_status(cid)
+        if status_payload.get("publisher_connected") and status_payload.get("status") == "READY":
+            return True
+    return False
 
 
 def _fallback_segment_status() -> SegmentAIStatus:

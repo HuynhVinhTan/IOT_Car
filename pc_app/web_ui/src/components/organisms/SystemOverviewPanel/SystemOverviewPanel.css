@@ -1,0 +1,25 @@
+/* SystemOverviewPanel.css */
+
+.telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.telemetry-grid .sensor-metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.telemetry-grid .metric-danger .metric-text strong {
+  color: #c62828;
+}
+
+.telemetry-grid .metric-warning .metric-text strong {
+  color: #e65100;
+}
+
+.telemetry-grid .metric-success .metric-text strong {
+  color: #2e7d32;
+}

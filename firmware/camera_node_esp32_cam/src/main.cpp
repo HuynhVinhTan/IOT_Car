@@ -40,6 +40,9 @@ void setupWiFi() {
   WiFi.disconnect(true);
   delay(1000);
 
+  // DNS fallback
+  WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, IPAddress(8,8,8,8), IPAddress(1,1,1,1));
+
   WiFi.begin(appConfig.wifiSsid.c_str(), appConfig.wifiPassword.c_str());
   unsigned long startAt = millis();
   while (WiFi.status() != WL_CONNECTED) {
@@ -102,15 +105,62 @@ bool setupCamera() {
 
 void setupBackendWebSocket() {
   Serial.println("[BOOT] Step 3 WebSocket");
+
+  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+  Serial.println("[NTP] Syncing time...");
+  unsigned long ntpStart = millis();
+  while (time(nullptr) < 100000) {
+    if (millis() - ntpStart > 10000) {
+      Serial.println("[NTP] Sync timeout");
+      break;
+    }
+    delay(500);
+  }
+  if (time(nullptr) > 100000) {
+    Serial.println("[TLS] NTP synced");
+  }
+
+  String wsPath = buildCameraWsPath();
   
-  // Debug info
+  Serial.printf("[WS] path: %s\n", wsPath.c_str());
+  Serial.printf("[WS] free heap: %u\n", ESP.getFreeHeap());
+  Serial.printf("[WS] free psram: %u\n", ESP.getFreePsram());
+  Serial.printf("[WS] WiFi RSSI: %d\n", WiFi.RSSI());
+  
+  IPAddress dnsResult;
+  WiFi.hostByName(appConfig.backendHost.c_str(), dnsResult);
+  Serial.printf("[WS] DNS result for %s: %s\n", appConfig.backendHost.c_str(), dnsResult.toString().c_str());
+
   Serial.printf("[WS] Host: %s, Port: %u, TLS: %s\n", appConfig.backendHost.c_str(), appConfig.backendPort, appConfig.backendTls ? "true" : "false");
   
   if (appConfig.backendTls) {
-    backendWebSocket.beginSSL(appConfig.backendHost.c_str(), appConfig.backendPort, buildCameraWsPath().c_str());
+    Serial.println("[TLS] mode=standard (CA cert required if not trusted)");
+    backendWebSocket.beginSSL(appConfig.backendHost.c_str(), appConfig.backendPort, wsPath.c_str(), "");
   } else {
-    backendWebSocket.begin(appConfig.backendHost.c_str(), appConfig.backendPort, buildCameraWsPath().c_str());
+    backendWebSocket.begin(appConfig.backendHost.c_str(), appConfig.backendPort, wsPath.c_str());
   }
+
+  backendWebSocket.onEvent([](WStype_t type, uint8_t * payload, size_t length) {
+    switch(type) {
+      case WStype_DISCONNECTED:
+        Serial.println("[WS] WStype_DISCONNECTED");
+        wsConnected = false;
+        break;
+      case WStype_CONNECTED:
+        Serial.printf("[WS] WStype_CONNECTED to url: %s\n", payload);
+        wsConnected = true;
+        break;
+      case WStype_TEXT:
+        Serial.printf("[WS] WStype_TEXT: %s\n", payload);
+        break;
+      case WStype_ERROR:
+        Serial.printf("[WS] WStype_ERROR: %s (Heap: %u, PSRAM: %u)\n", payload ? (const char*)payload : "null", ESP.getFreeHeap(), ESP.getFreePsram());
+        break;
+      default:
+        break;
+    }
+  });
+
   backendWebSocket.setReconnectInterval(5000);
 }
 
@@ -128,6 +178,26 @@ void setup() {
   setupBackendWebSocket();
 }
 
+unsigned long lastFrameSent = 0;
+int frameCounter = 0;
+
+void captureAndSendFrameIfDue() {
+  if (!wsConnected) return;
+  if (millis() - lastFrameSent < 100) return; // 10 FPS limit
+
+  camera_fb_t *fb = esp_camera_fb_get();
+  if (!fb) return;
+
+  if (backendWebSocket.sendBIN(fb->buf, fb->len)) {
+    frameCounter++;
+    Serial.printf("[CAM] Frame sent #%d, size=%u\n", frameCounter, fb->len);
+    lastFrameSent = millis();
+  }
+  
+  esp_camera_fb_return(fb);
+}
+
 void loop() {
   backendWebSocket.loop();
+  captureAndSendFrameIfDue();
 }

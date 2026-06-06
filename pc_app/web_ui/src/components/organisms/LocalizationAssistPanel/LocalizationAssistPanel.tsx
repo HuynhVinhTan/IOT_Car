@@ -3,6 +3,7 @@ import { Card } from "../../atoms/Card/Card";
 import { RouteSegmentButton } from "../../molecules/RouteSegmentButton/RouteSegmentButton";
 import { SelectedSegmentBadge } from "../../molecules/SelectedSegmentBadge/SelectedSegmentBadge";
 import type { RouteSegment, RouteSelectionState } from "../../../types/routeSegment";
+import "./LocalizationAssistPanel.css";
 
 interface LocalizationAssistPanelProps {
   segments: RouteSegment[];
@@ -29,35 +30,35 @@ export function LocalizationAssistPanel({
 
   return (
     <Card title="Localization Assist">
-      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <p style={{ fontSize: "12px", color: "var(--text-secondary)", margin: 0 }}>
+      <div className="localization-assist-panel">
+        <div className="localization-header">
+          <p className="localization-description">
             Use this panel to help the backend re-locate the robot when current node is UNKNOWN or lost.
           </p>
-          <button onClick={refreshData} disabled={loading} style={{fontSize: "12px", border: "1px solid var(--border-color)", background: "transparent", color: "var(--text-primary)", cursor: "pointer", borderRadius: "4px", padding: "2px 8px"}}>Refresh</button>
+          <button onClick={refreshData} disabled={loading} className="localization-refresh-btn">Refresh</button>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", background: "var(--bg-surface-hover)", padding: "12px", borderRadius: "4px" }}>
-          <div>
-            <div style={{ fontSize: "11px", color: "var(--text-secondary)", textTransform: "uppercase", marginBottom: "4px" }}>Current Node</div>
-            <div style={{ fontWeight: "bold", color: selection?.current_node === "UNKNOWN" ? "var(--status-warning)" : "var(--text-primary)" }}>
+        <div className="localization-status-grid">
+          <div className="localization-status-item">
+            <div className="localization-status-label">Current Node</div>
+            <div className={`localization-status-value ${selection?.current_node === "UNKNOWN" ? "unknown" : ""}`}>
               {selection?.current_node || "UNKNOWN"}
             </div>
           </div>
-          <div>
-            <div style={{ fontSize: "11px", color: "var(--text-secondary)", textTransform: "uppercase", marginBottom: "4px" }}>Selected Segment</div>
+          <div className="localization-status-item">
+            <div className="localization-status-label">Selected Segment</div>
             <SelectedSegmentBadge segmentId={selection?.selected_segment_id || null} />
           </div>
         </div>
 
         <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-            <h4 style={{ margin: 0, fontSize: "14px" }}>Available Segments</h4>
-            <button onClick={autoInfer} disabled={loading} style={{ fontSize: "11px", padding: "4px 8px", background: "var(--bg-surface)", color: "var(--text-primary)", border: "1px solid var(--border-color)", borderRadius: "4px", cursor: "pointer" }}>
+          <div className="localization-segments-header">
+            <h4 className="localization-segments-title">Available Segments</h4>
+            <button onClick={autoInfer} disabled={loading} className="localization-auto-infer-btn">
               Auto Infer
             </button>
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+          <div className="localization-segments-container">
             {segments.map(seg => (
               <RouteSegmentButton
                 key={seg.segment_id}
@@ -68,23 +69,23 @@ export function LocalizationAssistPanel({
                 disabled={loading}
               />
             ))}
-            {segments.length === 0 && <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>No segments found.</span>}
+            {segments.length === 0 && <span className="localization-no-segments">No segments found.</span>}
           </div>
         </div>
 
         {selection?.selected_segment_id && (
-          <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+          <div className="localization-action-buttons">
             <button
               onClick={() => select(selection.selected_segment_id!, true)}
               disabled={loading || selection.current_segment_id === selection.selected_segment_id}
-              style={{ flex: 1, padding: "8px", background: "var(--brand-primary)", border: "none", color: "white", borderRadius: "4px", cursor: "pointer", opacity: loading || (selection.current_segment_id === selection.selected_segment_id) ? 0.5 : 1 }}
+              className="localization-confirm-btn"
             >
               I am on this segment
             </button>
             <button
               onClick={cancel}
               disabled={loading}
-              style={{ padding: "8px 16px", background: "var(--bg-surface)", color: "var(--status-error)", border: "1px solid var(--status-error)", borderRadius: "4px", cursor: "pointer" }}
+              className="localization-cancel-btn"
             >
               Cancel
             </button>
@@ -117,7 +118,7 @@ export function LocalizationAssistPanel({
         )}
 
         {selection && selection.reason && (
-          <div style={{ padding: "8px", background: selection.accepted ? "rgba(40, 167, 69, 0.1)" : "rgba(220, 53, 69, 0.1)", color: selection.accepted ? "var(--status-success)" : "var(--status-error)", borderRadius: "4px", fontSize: "12px" }}>
+          <div className={`localization-result-message ${selection.accepted ? "success" : "error"}`}>
             {selection.reason}
           </div>
         )}
