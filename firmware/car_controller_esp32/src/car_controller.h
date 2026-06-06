@@ -19,9 +19,11 @@ class  CarController {
  public:
   CarController();
   void begin();
-  void update();
+  void networkUpdate();
+  void hardwareUpdate();
 
  private:
+  static void hardwareTaskCode(void* parameter);
   void setupWiFi(const AppConfig& config);
   void setupWebsocket(const AppConfig& config);
   void onWebsocketEvent(WStype_t type, uint8_t * payload, size_t length);
@@ -59,6 +61,10 @@ class  CarController {
   TelemetryPublisher* telemetryPublisher_;
   SafetyGuard* safetyGuard_;
   WebSocketsClient* webSocket_;
+
+  SemaphoreHandle_t stateMutex_ = nullptr;
+  QueueHandle_t telemetryQueue_ = nullptr;
+  TaskHandle_t hardwareTaskHandle_ = nullptr;
 
   DriveMode currentDriveMode_ = DriveMode::Idle;
   SafetyStatus latestSafetyStatus_;

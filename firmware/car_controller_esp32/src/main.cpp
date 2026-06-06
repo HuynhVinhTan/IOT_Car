@@ -7,6 +7,6 @@ void setup() {
 }
 
 void loop() {
-  Serial.println("alive");
-  delay(1000);
+  carController.networkUpdate();
+  vTaskDelay(pdMS_TO_TICKS(10));
 }

@@ -22,6 +22,9 @@ CarController::CarController() :
 
 void CarController::begin() {
   g_carController = this;
+  stateMutex_ = xSemaphoreCreateMutex();
+  telemetryQueue_ = xQueueCreate(10, sizeof(char*));
+  
   Serial.begin(115200);
   
   pinMode(MODE_HOLD_BUTTON_PIN, INPUT_PULLUP);
@@ -41,9 +44,11 @@ void CarController::begin() {
 
   telemetryPublisher_->begin(Serial);
   telemetryPublisher_->setJsonCallback([](const String& json) {
-      if (g_carController && g_carController->webSocket_->isConnected()) {
-          String mutableJson = json;
-          g_carController->webSocket_->sendTXT(mutableJson);
+      if (g_carController && g_carController->telemetryQueue_) {
+          char* msg = strdup(json.c_str());
+          if (xQueueSend(g_carController->telemetryQueue_, &msg, 0) != pdPASS) {
+              free(msg);
+          }
       }
   });
 
@@ -52,12 +57,24 @@ void CarController::begin() {
   leftSpeedSensor_->begin();
   rightSpeedSensor_->begin();
   localStatusButton_->begin();
-  lcdDisplay_->begin();
+  // lcdDisplay_->begin(); // Đã vô hiệu hóa LCD
 
   const unsigned long nowMs = millis();
   lastCommandMs_ = nowMs;
   lastRemoteDriveCommandMs_ = nowMs;
+
+  xTaskCreatePinnedToCore(
+      CarController::hardwareTaskCode,
+      "HardwareTask",
+      4096,
+      this,
+      5,
+      &hardwareTaskHandle_,
+      1); // Core 1
+
+  xSemaphoreTake(stateMutex_, portMAX_DELAY);
   telemetryPublisher_->publishEvent("boot", "Car firmware started (WiFi enabled)");
+  xSemaphoreGive(stateMutex_);
 }
 
 void CarController::setupWiFi(const AppConfig& config) {
@@ -93,7 +110,9 @@ void CarController::onWebsocketEvent(WStype_t type, uint8_t * payload, size_t le
       break;
     case WStype_CONNECTED:
       Serial.println("[WS] Connected to Backend");
+      xSemaphoreTake(stateMutex_, portMAX_DELAY);
       telemetryPublisher_->publishEvent("ws_connected", "WebSocket connection established");
+      xSemaphoreGive(stateMutex_);
       break;
     case WStype_TEXT: {
       String cmd = String((char*)payload);
@@ -106,12 +125,36 @@ void CarController::onWebsocketEvent(WStype_t type, uint8_t * payload, size_t le
   }
 }
 
-void CarController::update() {
-  const unsigned long nowMs = millis();
+void CarController::hardwareTaskCode(void* parameter) {
+  CarController* instance = static_cast<CarController*>(parameter);
+  while (true) {
+    instance->hardwareUpdate();
+    vTaskDelay(pdMS_TO_TICKS(10));
+  }
+}
 
+void CarController::networkUpdate() {
   webSocket_->loop();
   
+  char* msg = nullptr;
+  while (xQueueReceive(telemetryQueue_, &msg, 0) == pdTRUE) {
+    if (webSocket_->isConnected()) {
+      webSocket_->sendTXT(msg);
+    }
+    free(msg);
+  }
+}
+
+void CarController::hardwareUpdate() {
+  const unsigned long nowMs = millis();
+
   localStatusButton_->update(nowMs);
+  leftSpeedSensor_->update(nowMs);
+  rightSpeedSensor_->update(nowMs);
+  updateSensorsIfDue(nowMs);
+
+  xSemaphoreTake(stateMutex_, portMAX_DELAY);
+
   if (localStatusButton_->wasLongPressed()) {
     handleModeButtonLongPress();
   } else if (localStatusButton_->wasShortPressed()) {
@@ -128,12 +171,12 @@ void CarController::update() {
     }
   } else {
     modeHoldStartTime_ = 0;
-    modeHoldTriggered_ = false;
+    if (modeHoldTriggered_) {
+      // Tự động trả xe về IDLE khi nhả nút "cướp cò"
+      enterIdleMode("mode button released");
+      modeHoldTriggered_ = false;
+    }
   }
-
-  leftSpeedSensor_->update(nowMs);
-  rightSpeedSensor_->update(nowMs);
-  updateSensorsIfDue(nowMs);
 
   if (currentDriveMode_ == DriveMode::EmergencyStop) {
     engine_->stop();
@@ -146,15 +189,20 @@ void CarController::update() {
 
   updateLocalDisplay(nowMs);
   publishTelemetryIfDue(nowMs);
+
+  xSemaphoreGive(stateMutex_);
 }
 
 void CarController::handleCommand(const ParsedCommand& parsedCommand) {
   const unsigned long nowMs = millis();
+  
+  xSemaphoreTake(stateMutex_, portMAX_DELAY);
   lastCommandMs_ = nowMs;
 
   if (!parsedCommand.valid) {
     telemetryPublisher_->publishCommandAck(parsedCommand.commandName, false,
                                           parsedCommand.errorMessage);
+    xSemaphoreGive(stateMutex_);
     return;
   }
 
@@ -163,6 +211,7 @@ void CarController::handleCommand(const ParsedCommand& parsedCommand) {
     telemetryPublisher_->publishCommandAck(
         parsedCommand.commandName, false,
         "Emergency stop active. Send RESET_EMERGENCY");
+    xSemaphoreGive(stateMutex_);
     return;
   }
 
@@ -205,6 +254,7 @@ void CarController::handleCommand(const ParsedCommand& parsedCommand) {
       telemetryPublisher_->publishCommandAck(parsedCommand.commandName, false, "Unsupported or legacy command");
       break;
   }
+  xSemaphoreGive(stateMutex_);
 }
 
 void CarController::handleSetModeCommand(DriveMode requestedMode) {
@@ -257,7 +307,7 @@ void CarController::handleModeButtonLongPress() {
   if (currentDriveMode_ != DriveMode::EmergencyStop) {
     enterStatusDisplayMode("Long press: Status Display");
   } else {
-    lcdDisplay_->turnOn();
+    // lcdDisplay_->turnOn(); // Đã vô hiệu hóa LCD
   }
 }
 
@@ -274,6 +324,8 @@ void CarController::updateManualRemoteMode(unsigned long nowMs) {
   }
 
   effectiveMotorSpeeds_ = desiredMotorSpeeds_;
+  /*
+  // YÊU CẦU: Trong chế độ MANUAL, trao toàn quyền cho người lái, vô hiệu hóa cảm biến chặn
   if (safetyGuard_->shouldBlockForwardMotion() && motorSpeedsMoveForward(effectiveMotorSpeeds_)) {
     effectiveMotorSpeeds_.leftMotorSpeed = 0;
     effectiveMotorSpeeds_.rightMotorSpeed = 0;
@@ -282,6 +334,7 @@ void CarController::updateManualRemoteMode(unsigned long nowMs) {
     effectiveMotorSpeeds_.leftMotorSpeed = 0;
     effectiveMotorSpeeds_.rightMotorSpeed = 0;
   }
+  */
 
   engine_->setMotorSpeeds(effectiveMotorSpeeds_.leftMotorSpeed, effectiveMotorSpeeds_.rightMotorSpeed);
 }
@@ -291,6 +344,10 @@ void CarController::updateSensorsIfDue(unsigned long nowMs) {
 
   distanceSensorArray_->update(nowMs);
   latestDistanceReadings_ = distanceSensorArray_->getReadings();
+  
+  // Vô hiệu hóa Cliff Sensor
+  latestCliffReadings_ = CliffReadings(); 
+
   latestSafetyStatus_ = safetyGuard_->update(latestDistanceReadings_, latestCliffReadings_);
   lastSensorReadMs_ = nowMs;
 }
@@ -302,6 +359,8 @@ void CarController::publishTelemetryIfDue(unsigned long nowMs) {
 }
 
 void CarController::updateLocalDisplay(unsigned long nowMs) {
+  return; // Vô hiệu hóa hoàn toàn khối LCD và đọc pin (Battery)
+
   if (isRunningMode(currentDriveMode_)) {
     lcdDisplay_->turnOff();
     return;
@@ -339,7 +398,7 @@ void CarController::enterStatusDisplayMode(const String& reason) {
   effectiveMotorSpeeds_ = MotorSpeeds();
   controlSource_ = "STATUS";
   engine_->stop();
-  lcdDisplay_->turnOn();
+  // lcdDisplay_->turnOn(); // Đã vô hiệu hóa LCD
   if (reason.length() > 0) telemetryPublisher_->publishEvent("status", reason);
 }
 
@@ -389,10 +448,10 @@ CarTelemetry CarController::buildTelemetry(unsigned long nowMs) const {
   carTelemetry.personDetected = personDetectedByAi_;
   carTelemetry.emergencyStopReason = emergencyStopReason_;
   carTelemetry.controlSource = controlSource_;
-  carTelemetry.batteryVoltage = 0.0F;
+  carTelemetry.batteryVoltage = 0.0f; // Bỏ qua đọc batteryMonitor
   carTelemetry.batteryPercent = -1;
-  carTelemetry.lcdStatus = lcdDisplay_->status();
-  carTelemetry.lcdEnabled = lcdDisplay_->isEnabled();
+  carTelemetry.lcdStatus = ""; // Bỏ qua trạng thái LCD
+  carTelemetry.lcdEnabled = false;
   carTelemetry.currentNode = WiFi.localIP().toString(); // Use IP as node for now
   return carTelemetry;
 }
