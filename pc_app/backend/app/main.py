@@ -88,6 +88,10 @@ if settings.enable_robot_control:
     from app.services.map_segment_ai_service import MapSegmentAIService
 
     map_graph = MapGraph()
+    
+    map_json_path = getattr(settings, "active_map_path", "active_map.json")
+    map_graph.load_from_active_map(map_json_path)
+
     localization_service = LocalizationService(map_graph)
     path_planner = PathPlanner(map_graph)
     coverage_planner = CoveragePlanner(map_graph)
@@ -159,6 +163,17 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             mission_service.handle_search_progress()
             message = localization_service.enrich_car_telemetry(message)
             message["mission_state"] = mission_service.snapshot()
+
+            if route_segment_service:
+                current_node = message.get("current_node")
+                target_node = getattr(localization_service, "target_node", None)
+                
+                if current_node and target_node and current_node == target_node:
+                    logger.info(f" Xe đã đến đích {current_node}. Đang tính toán phân đoạn tiếp theo...")
+                    asyncio.run_coroutine_threadsafe(
+                        route_segment_service.continue_from_node(current_node),
+                        event_loop,
+                    )
 
         telemetry_service.update_car_message(message)
 
@@ -329,7 +344,6 @@ async def websocket_car_endpoint(websocket: WebSocket):
     finally:
         app.state.car_ws = None
         app.state.car_ws_connected = False
-
 
 
 if __name__ == "__main__":

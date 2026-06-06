@@ -34,6 +34,26 @@ class MapGraph:
             {"segment_id": "F_G", "from_node": "F", "to_node": "G", "label": "F → G"},
         ]
 
+    def load_from_active_map(self, map_file_path: str) -> None:
+        """Đọc file map JSON (do FE save), load distance từ edges vào segments."""
+        import json, pathlib
+        path = pathlib.Path(map_file_path)
+        if not path.exists():
+            return
+
+        try:
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+
+            edges = {f"{e['from']}_{e['to']}": e for e in data.get("edges", [])}
+
+            for seg in self.segments:
+                key = seg["segment_id"]  # ví dụ "A_B"
+                if key in edges:
+                    seg["distance"] = edges[key].get("distance", 0.0)
+        except Exception:
+            pass
+
     def neighbors(self, node_id: str) -> list[str]:
         neighbors: list[str] = []
         for edge in self.edges:
@@ -76,6 +96,11 @@ class MapGraph:
         """Return Euclidean pixel distance for a segment, or None if not found."""
         for seg in self.segments:
             if seg["segment_id"] == segment_id:
+                # Ưu tiên lấy khoảng cách thực tế vừa load từ file map JSON
+                if "distance" in seg:
+                    return seg["distance"]
+
+                # Khối xử lý Euclide dự phòng gốc
                 a = self.nodes.get(seg["from_node"])
                 b = self.nodes.get(seg["to_node"])
                 if a and b:
@@ -84,7 +109,7 @@ class MapGraph:
 
     def to_dict(self) -> dict[str, Any]:
         return {"nodes": list(self.nodes.values()), "edges": self.edges}
-
+    
     def get_segments(self) -> list[dict[str, Any]]:
         result = []
         for seg in self.segments:

@@ -249,3 +249,35 @@ class RouteSegmentService:
             )
             # Mark segment visited so we don't loop
             next_seg["is_visited"] = True
+
+
+    async def continue_from_node(self, node: str) -> None:
+       
+        self._localization_service.update_location(current_node=node)
+        
+        next_segment = self._find_next_segment(from_node=node)
+        
+        if next_segment is None:
+            await self._car_control_service.send_command({"command": "STOP_MISSION"})
+            return
+            
+        seg_id = next_segment["segment_id"]
+        pixel_dist = self._map_graph.segment_pixel_distance(seg_id)
+        
+        if pixel_dist:
+            duration_ms = int((pixel_dist * PIXEL_TO_CM / SPEED_CM_PER_S) * 1000)
+            
+            self._localization_service.update_location(current_segment=seg_id)
+            
+            # Ra lệnh cho xe chạy ngầm
+            await self._car_control_service.drive_timed(
+                duration_ms, DRIVE_SPEED, DRIVE_SPEED
+            )
+            
+        next_segment["is_visited"] = True
+
+    def _find_next_segment(self, from_node: str) -> dict[str, Any] | None:
+        for seg in self.get_segments():
+            if seg["from_node"] == from_node and not seg.get("is_visited", False):
+                return seg
+        return None
