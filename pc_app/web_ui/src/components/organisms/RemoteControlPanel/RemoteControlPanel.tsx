@@ -7,6 +7,7 @@ import {
 } from "../../../services/carService";
 import * as mapService from "../../../services/mapService";
 import type { Map } from "../../../services/mapService";
+import "./RemoteControlPanel.css";
 
 export function RemoteControlPanel() {
   const [keyboardEnabled, setKeyboardEnabled] = useState(false);
@@ -92,7 +93,6 @@ export function RemoteControlPanel() {
     (e: KeyboardEvent) => {
       if (!keyboardEnabled) return;
 
-      // Don't block keyboard when user is typing
       const target = e.target as HTMLElement;
       if (
         target.tagName === "INPUT" ||
@@ -242,256 +242,214 @@ export function RemoteControlPanel() {
 
   return (
     <Card title="Remote Control">
-      <div
-        style={{
-          marginBottom: "15px",
-          padding: "10px",
-          background: "#f0f0f0",
-          borderRadius: "5px",
-          fontSize: "13px",
-        }}
-      >
-        <strong>Status: </strong>
-        {isConnected ? (
-          <span style={{ color: "green" }}>Connected</span>
-        ) : (
-          <span style={{ color: "red" }}>Offline</span>
-        )}
-        {carStatus && (
-          <div style={{ marginTop: "5px" }}>
-            <div>Car ID: {carStatus.car_id || "N/A"}</div>
-            <div>Mode: {carStatus.mode || "Unknown"}</div>
+      <div className="remote-control-panel">
+        {/* Status Box */}
+        <div className="remote-status-box">
+          <div className="remote-status-label">
+            Status:{" "}
+            <span className={isConnected ? "remote-status-connected" : "remote-status-offline"}>
+              {isConnected ? "Connected" : "Offline"}
+            </span>
+          </div>
+          {carStatus && (
             <div>
-              Last seen:{" "}
-              {carStatus.last_seen_ms
-                ? new Date(carStatus.last_seen_ms).toLocaleTimeString()
-                : "Never"}
-            </div>
-            {carStatus.latest_telemetry?.remote_command_timed_out && (
-              <div style={{ color: "orange" }}>⚠️ Remote command timed out</div>
-            )}
-            {carStatus.latest_telemetry?.safety_override_active && (
-              <div style={{ color: "orange" }}>⚠️ Safety override active</div>
-            )}
-            {(carStatus.latest_telemetry?.obstacle_front ||
-              carStatus.latest_telemetry?.forward_unsafe) && (
-              <div style={{ color: "red", fontWeight: "bold" }}>
-                ⚠️ Obstacle Front!
+              <div className="remote-status-item">Car ID: {carStatus.car_id || "N/A"}</div>
+              <div className="remote-status-item">Mode: {carStatus.mode || "Unknown"}</div>
+              <div className="remote-status-item">
+                Last seen:{" "}
+                {carStatus.last_seen_ms
+                  ? new Date(carStatus.last_seen_ms).toLocaleTimeString()
+                  : "Never"}
               </div>
-            )}
+              {carStatus.latest_telemetry?.remote_command_timed_out && (
+                <div className="remote-status-item remote-status-warning">
+                  ⚠️ Remote command timed out
+                </div>
+              )}
+              {carStatus.latest_telemetry?.safety_override_active && (
+                <div className="remote-status-item remote-status-warning">
+                  ⚠️ Safety override active
+                </div>
+              )}
+              {(carStatus.latest_telemetry?.obstacle_front ||
+                carStatus.latest_telemetry?.forward_unsafe) && (
+                <div className="remote-status-item remote-status-warning" style={{ fontWeight: "bold" }}>
+                  ⚠️ Obstacle Front!
+                </div>
+              )}
+            </div>
+          )}
+          {statusError && <div className="remote-status-error">{statusError}</div>}
+          {commandError && <div className="remote-status-error">{commandError}</div>}
+        </div>
+
+        {/* Button Group */}
+        <div className="remote-button-group">
+          <button
+            className={`remote-btn ${keyboardEnabled ? "active" : ""}`}
+            onClick={(e) => {
+              setKeyboardEnabled(!keyboardEnabled);
+              e.currentTarget.blur();
+            }}
+            disabled={!canControl}
+          >
+            {keyboardEnabled ? "Disable Keyboard" : "Enable Keyboard"}
+          </button>
+
+          {!isManualMode && isConnected && (
+            <button className="remote-btn warning" onClick={switchToManualMode}>
+              Switch to Manual Remote
+            </button>
+          )}
+
+          <button
+            className={`remote-btn info`}
+            onClick={startAutonomous}
+            disabled={!isConnected || !activeMapId}
+          >
+            Start Autonomous
+          </button>
+        </div>
+
+        {/* Error Messages */}
+        {autonomousError && <div className="remote-error-message">{autonomousError}</div>}
+
+        {!canControl && (
+          <div className="remote-control-disabled">
+            {!isConnected
+              ? "Car controller offline"
+              : "Switch to Manual Remote mode first"}
           </div>
         )}
-        {statusError && (
-          <div style={{ color: "red", fontSize: "11px" }}>{statusError}</div>
-        )}
-        {commandError && (
-          <div style={{ color: "red", fontSize: "11px" }}>{commandError}</div>
-        )}
-      </div>
 
-      <div
-        style={{
-          display: "flex",
-          gap: "10px",
-          marginBottom: "15px",
-          flexWrap: "wrap",
-        }}
-      >
-        <button
-          onClick={(e) => {
-            setKeyboardEnabled(!keyboardEnabled);
-            e.currentTarget.blur();
-          }}
-          disabled={!canControl}
-          style={{ fontWeight: keyboardEnabled ? "bold" : "normal" }}
-        >
-          {keyboardEnabled ? "Disable Keyboard" : "Enable Keyboard"}
-        </button>
-
-        {!isManualMode && isConnected && (
-          <button
-            onClick={switchToManualMode}
-            style={{ background: "#ffc107", color: "black" }}
-          >
-            Switch to Manual Remote
-          </button>
-        )}
-
-        <button
-          onClick={startAutonomous}
-          disabled={!isConnected || !activeMapId}
-          style={{
-            background: activeMapId ? "#17a2b8" : "#ccc",
-            color: "white",
-          }}
-        >
-          Start Autonomous
-        </button>
-      </div>
-
-      {autonomousError && (
-        <div
-          style={{
-            color: "red",
-            marginBottom: "10px",
-            fontSize: "12px",
-            padding: "8px",
-            border: "1px solid red",
-            borderRadius: "4px",
-          }}
-        >
-          {autonomousError}
-        </div>
-      )}
-
-      {!canControl && (
-        <div
-          style={{
-            color: "red",
-            marginBottom: "10px",
-            fontSize: "13px",
-            fontWeight: "bold",
-          }}
-        >
-          {!isConnected
-            ? "Car controller offline"
-            : "Switch to Manual Remote mode first"}
-        </div>
-      )}
-
-      <div
-        style={{
-          marginBottom: "15px",
-          padding: "10px",
-          background: "#f9f9f9",
-          borderRadius: "5px",
-        }}
-      >
-        <h4 style={{ margin: "0 0 10px 0" }}>Autonomous Control</h4>
-        <div style={{ marginBottom: "8px" }}>
-          <strong>Active Map:</strong>
-          {activeMapId ? (
-            <span style={{ color: "green", marginLeft: "5px" }}>
-              ✓ {maps.find((m) => m.id === activeMapId)?.name || activeMapId}
-            </span>
-          ) : (
-            <span style={{ color: "red", marginLeft: "5px" }}>
-              No active map selected
-            </span>
-          )}
-        </div>
-        <div style={{ marginBottom: "8px" }}>
-          <label style={{ marginRight: "10px" }}>
-            Select Map to Activate:
-            <select
-              value={selectedMapId}
-              onChange={(e) => setSelectedMapId(e.target.value)}
-              style={{ marginLeft: "5px", padding: "5px" }}
-              disabled={!isConnected}
-            >
-              <option value="">-- Choose a map --</option>
-              {maps.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name || m.id}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button
-            onClick={async () => {
-              if (selectedMapId) {
-                try {
-                  await mapService.activateMap(selectedMapId);
-                  setActiveMapId(selectedMapId);
-                  setSelectedMapId("");
-                  await loadActiveMap();
-                } catch (e) {
-                  setAutonomousError(`Failed to activate map: ${e}`);
+        {/* Autonomous Section */}
+        <div className="remote-autonomous-section">
+          <h4 className="remote-autonomous-title">Autonomous Control</h4>
+          <div className="remote-autonomous-item">
+            <span className="remote-autonomous-label">Active Map:</span>
+            {activeMapId ? (
+              <span className="remote-autonomous-active">
+                ✓ {maps.find((m) => m.id === activeMapId)?.name || activeMapId}
+              </span>
+            ) : (
+              <span className="remote-autonomous-inactive">No active map selected</span>
+            )}
+          </div>
+          <div className="remote-autonomous-item">
+            <label style={{ marginRight: "10px" }}>
+              Select Map to Activate:
+              <select
+                value={selectedMapId}
+                onChange={(e) => setSelectedMapId(e.target.value)}
+                className="remote-map-select"
+                disabled={!isConnected}
+              >
+                <option value="">-- Choose a map --</option>
+                {maps.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name || m.id}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              className="remote-activate-btn"
+              onClick={async () => {
+                if (selectedMapId) {
+                  try {
+                    await mapService.activateMap(selectedMapId);
+                    setActiveMapId(selectedMapId);
+                    setSelectedMapId("");
+                    await loadActiveMap();
+                  } catch (e) {
+                    setAutonomousError(`Failed to activate map: ${e}`);
+                  }
                 }
+              }}
+              disabled={!selectedMapId || !isConnected}
+            >
+              Activate
+            </button>
+          </div>
+        </div>
+
+        {/* Control Grid */}
+        <div className={`remote-control-grid ${!canControl ? "disabled" : ""}`}>
+          <div />
+          <button
+            className="remote-control-btn"
+            onMouseDown={() => {
+              if (!intervalRef.current) {
+                sendDrive(150, 150);
+                intervalRef.current = window.setInterval(
+                  () => sendDrive(150, 150),
+                  150,
+                );
               }
             }}
-            disabled={!selectedMapId || !isConnected}
+            onMouseUp={stop}
+            onMouseLeave={stop}
           >
-            Activate
+            ↑
           </button>
+          <div />
+          <button
+            className="remote-control-btn"
+            onMouseDown={() => {
+              if (!intervalRef.current) {
+                sendDrive(-150, 150);
+                intervalRef.current = window.setInterval(
+                  () => sendDrive(-150, 150),
+                  150,
+                );
+              }
+            }}
+            onMouseUp={stop}
+            onMouseLeave={stop}
+          >
+            ←
+          </button>
+          <button
+            className="remote-control-btn remote-control-stop"
+            onMouseDown={stop}
+          >
+            STOP
+          </button>
+          <button
+            className="remote-control-btn"
+            onMouseDown={() => {
+              if (!intervalRef.current) {
+                sendDrive(150, -150);
+                intervalRef.current = window.setInterval(
+                  () => sendDrive(150, -150),
+                  150,
+                );
+              }
+            }}
+            onMouseUp={stop}
+            onMouseLeave={stop}
+          >
+            →
+          </button>
+          <div />
+          <button
+            className="remote-control-btn"
+            onMouseDown={() => {
+              if (!intervalRef.current) {
+                sendDrive(-150, -150);
+                intervalRef.current = window.setInterval(
+                  () => sendDrive(-150, -150),
+                  150,
+                );
+              }
+            }}
+            onMouseUp={stop}
+            onMouseLeave={stop}
+          >
+            ↓
+          </button>
+          <div />
         </div>
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "5px",
-          width: "150px",
-          opacity: canControl ? 1 : 0.5,
-          pointerEvents: canControl ? "auto" : "none",
-        }}
-      >
-        <div />
-        <button
-          onMouseDown={() => {
-            if (!intervalRef.current) {
-              sendDrive(150, 150);
-              intervalRef.current = window.setInterval(
-                () => sendDrive(150, 150),
-                150,
-              );
-            }
-          }}
-          onMouseUp={stop}
-          onMouseLeave={stop}
-        >
-          ↑
-        </button>
-        <div />
-        <button
-          onMouseDown={() => {
-            if (!intervalRef.current) {
-              sendDrive(-150, 150);
-              intervalRef.current = window.setInterval(
-                () => sendDrive(-150, 150),
-                150,
-              );
-            }
-          }}
-          onMouseUp={stop}
-          onMouseLeave={stop}
-        >
-          ←
-        </button>
-        <button onMouseDown={stop}>STOP</button>
-        <button
-          onMouseDown={() => {
-            if (!intervalRef.current) {
-              sendDrive(150, -150);
-              intervalRef.current = window.setInterval(
-                () => sendDrive(150, -150),
-                150,
-              );
-            }
-          }}
-          onMouseUp={stop}
-          onMouseLeave={stop}
-        >
-          →
-        </button>
-        <div />
-        <button
-          onMouseDown={() => {
-            if (!intervalRef.current) {
-              sendDrive(-150, -150);
-              intervalRef.current = window.setInterval(
-                () => sendDrive(-150, -150),
-                150,
-              );
-            }
-          }}
-          onMouseUp={stop}
-          onMouseLeave={stop}
-        >
-          ↓
-        </button>
-        <div />
       </div>
     </Card>
   );

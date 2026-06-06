@@ -1,5 +1,6 @@
 import { Card } from "../../atoms/Card/Card";
 import { MetricText } from "../../atoms/MetricText/MetricText";
+import "./SystemOverviewPanel.css";
 
 interface SystemOverviewPanelProps {
   carTelemetry: any;

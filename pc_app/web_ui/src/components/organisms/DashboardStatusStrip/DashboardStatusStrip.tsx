@@ -1,5 +1,6 @@
 import { StatusDot } from "../../atoms/StatusDot/StatusDot";
 import { Badge } from "../../atoms/Badge/Badge";
+import { AlertIcon } from "../../atoms/AlertIcon/AlertIcon";
 
 interface DashboardStatusStripProps {
   backendConnected: boolean;
@@ -50,8 +51,13 @@ export function DashboardStatusStrip({
         </div>
       )}
       {personFound && (
-        <div className="status-item">
-          <Badge tone="green">PERSON FOUND</Badge>
+        <div className="status-item status-item-alert">
+          <Badge tone="red">
+            <span className="inline-badge-content">
+              <AlertIcon active />
+              PHÁT HIỆN NGƯỜI
+            </span>
+          </Badge>
         </div>
       )}
     </div>
