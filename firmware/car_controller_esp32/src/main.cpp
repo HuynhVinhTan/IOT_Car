@@ -8,5 +8,6 @@ void setup() {
 }
 
 void loop() {
-  carController.update();
+  carController.networkUpdate();
+  vTaskDelay(pdMS_TO_TICKS(10));
 }

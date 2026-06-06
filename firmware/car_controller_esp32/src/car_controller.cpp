@@ -22,6 +22,9 @@ CarController::CarController() :
 
 void CarController::begin() {
   g_carController = this;
+  stateMutex_ = xSemaphoreCreateMutex();
+  telemetryQueue_ = xQueueCreate(10, sizeof(char*));
+  
   Serial.begin(115200);
   
   pinMode(MODE_HOLD_BUTTON_PIN, INPUT_PULLUP);
@@ -41,9 +44,11 @@ void CarController::begin() {
 
   telemetryPublisher_->begin(Serial);
   telemetryPublisher_->setJsonCallback([](const String& json) {
-      if (g_carController && g_carController->webSocket_->isConnected()) {
-          String mutableJson = json;
-          g_carController->webSocket_->sendTXT(mutableJson);
+      if (g_carController && g_carController->telemetryQueue_) {
+          char* msg = strdup(json.c_str());
+          if (xQueueSend(g_carController->telemetryQueue_, &msg, 0) != pdPASS) {
+              free(msg);
+          }
       }
   });
 
@@ -57,7 +62,19 @@ void CarController::begin() {
   const unsigned long nowMs = millis();
   lastCommandMs_ = nowMs;
   lastRemoteDriveCommandMs_ = nowMs;
+
+  xTaskCreatePinnedToCore(
+      CarController::hardwareTaskCode,
+      "HardwareTask",
+      4096,
+      this,
+      5,
+      &hardwareTaskHandle_,
+      1); // Core 1
+
+  xSemaphoreTake(stateMutex_, portMAX_DELAY);
   telemetryPublisher_->publishEvent("boot", "Car firmware started (WiFi enabled)");
+  xSemaphoreGive(stateMutex_);
 }
 
 void CarController::setupWiFi(const AppConfig& config) {
@@ -93,7 +110,9 @@ void CarController::onWebsocketEvent(WStype_t type, uint8_t * payload, size_t le
       break;
     case WStype_CONNECTED:
       Serial.println("[WS] Connected to Backend");
+      xSemaphoreTake(stateMutex_, portMAX_DELAY);
       telemetryPublisher_->publishEvent("ws_connected", "WebSocket connection established");
+      xSemaphoreGive(stateMutex_);
       break;
     case WStype_TEXT: {
       String cmd = String((char*)payload);
@@ -106,12 +125,36 @@ void CarController::onWebsocketEvent(WStype_t type, uint8_t * payload, size_t le
   }
 }
 
-void CarController::update() {
-  const unsigned long nowMs = millis();
+void CarController::hardwareTaskCode(void* parameter) {
+  CarController* instance = static_cast<CarController*>(parameter);
+  while (true) {
+    instance->hardwareUpdate();
+    vTaskDelay(pdMS_TO_TICKS(10));
+  }
+}
 
+void CarController::networkUpdate() {
   webSocket_->loop();
   
+  char* msg = nullptr;
+  while (xQueueReceive(telemetryQueue_, &msg, 0) == pdTRUE) {
+    if (webSocket_->isConnected()) {
+      webSocket_->sendTXT(msg);
+    }
+    free(msg);
+  }
+}
+
+void CarController::hardwareUpdate() {
+  const unsigned long nowMs = millis();
+
   localStatusButton_->update(nowMs);
+  leftSpeedSensor_->update(nowMs);
+  rightSpeedSensor_->update(nowMs);
+  updateSensorsIfDue(nowMs);
+
+  xSemaphoreTake(stateMutex_, portMAX_DELAY);
+
   if (localStatusButton_->wasLongPressed()) {
     handleModeButtonLongPress();
   } else if (localStatusButton_->wasShortPressed()) {
@@ -131,10 +174,6 @@ void CarController::update() {
     modeHoldTriggered_ = false;
   }
 
-  leftSpeedSensor_->update(nowMs);
-  rightSpeedSensor_->update(nowMs);
-  updateSensorsIfDue(nowMs);
-
   if (currentDriveMode_ == DriveMode::EmergencyStop) {
     engine_->stop();
   } else if (currentDriveMode_ == DriveMode::ManualRemote ||
@@ -146,15 +185,20 @@ void CarController::update() {
 
   updateLocalDisplay(nowMs);
   publishTelemetryIfDue(nowMs);
+
+  xSemaphoreGive(stateMutex_);
 }
 
 void CarController::handleCommand(const ParsedCommand& parsedCommand) {
   const unsigned long nowMs = millis();
+  
+  xSemaphoreTake(stateMutex_, portMAX_DELAY);
   lastCommandMs_ = nowMs;
 
   if (!parsedCommand.valid) {
     telemetryPublisher_->publishCommandAck(parsedCommand.commandName, false,
                                           parsedCommand.errorMessage);
+    xSemaphoreGive(stateMutex_);
     return;
   }
 
@@ -163,6 +207,7 @@ void CarController::handleCommand(const ParsedCommand& parsedCommand) {
     telemetryPublisher_->publishCommandAck(
         parsedCommand.commandName, false,
         "Emergency stop active. Send RESET_EMERGENCY");
+    xSemaphoreGive(stateMutex_);
     return;
   }
 
@@ -205,6 +250,7 @@ void CarController::handleCommand(const ParsedCommand& parsedCommand) {
       telemetryPublisher_->publishCommandAck(parsedCommand.commandName, false, "Unsupported or legacy command");
       break;
   }
+  xSemaphoreGive(stateMutex_);
 }
 
 void CarController::handleSetModeCommand(DriveMode requestedMode) {
