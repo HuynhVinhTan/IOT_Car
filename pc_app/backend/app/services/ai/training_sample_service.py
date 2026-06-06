@@ -37,13 +37,12 @@ class TrainingSampleService:
         if session.record_camera:
             frame_bytes = await self.camera_service.capture_frame_bytes()
             if frame_bytes:
-                file_obj = io.BytesIO(frame_bytes)
-                file_obj.name = f"frame_{int(time.time()*1000)}.jpg"
+                filename = f"frame_{int(time.time()*1000)}.jpg"
                 asset = await self.media_service.upload_asset(
-                    file=file_obj,
+                    image_bytes=frame_bytes,
                     folder=f"training/{session.id}",
                     purpose="training_frame",
-                    filename=file_obj.name
+                    filename=filename
                 )
                 media_asset_id = asset.id
 

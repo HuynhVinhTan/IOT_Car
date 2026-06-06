@@ -111,15 +111,15 @@ class DetectionService:
         db: AsyncSession,
         confidence: float | None = None, 
         source: str = "ai",
-        snapshot_file: Optional[Any] = None,
+        snapshot_bytes: Optional[bytes] = None,
         target_person_id: Optional[Any] = None
     ) -> DetectionEvent:
         # Legacy/Mock support
         snapshot_asset_id = None
-        if snapshot_file:
+        if snapshot_bytes:
             media_service = MediaAssetService(db)
             asset = await media_service.upload_asset(
-                file=snapshot_file,
+                image_bytes=snapshot_bytes,
                 folder="detections",
                 purpose="detection_snapshot"
             )

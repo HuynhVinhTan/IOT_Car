@@ -134,7 +134,15 @@ async def remote_safety_watchdog() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    # 1. Build Face Recognition Cache
+    # 1. Initialize Face Recognition
+    try:
+        logger.info("Initializing Face Recognition Service...")
+        await face_recognition_service.initialize()
+        logger.info("Face Recognition Service initialized.")
+    except Exception:
+        logger.exception("Error initializing Face Recognition Service")
+
+    # 2. Build Face Recognition Cache
     try:
         async with AsyncSessionLocal() as session:
             logger.info("Building face recognition cache...")
@@ -143,7 +151,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception:
         logger.exception("Error building face cache")
     
-    # 2. Initialize Person Detection (Lazy Load)
+    # 3. Initialize Person Detection (Lazy Load)
     if getattr(settings, "enable_person_detection", False) and person_detection_service:
         try:
             logger.info("Initializing YOLO model...")

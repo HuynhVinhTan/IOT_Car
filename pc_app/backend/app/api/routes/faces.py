@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, R
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
+from app.utils.upload_file_utils import read_upload_file_bytes
 from app.schemas.face import FaceTarget as FaceTargetSchema, FaceTargetCreate, FaceStatus, FaceVerifyResponse
 from app.schemas.vision import FaceRecognitionResult
 from app.services.face_registry_service import FaceRegistryService
@@ -23,13 +24,46 @@ async def register_target(
     target = await service.register_target(req)
     
     if image:
-        await service.add_target_image(target.id, image.file, is_primary=True)
+        try:
+            uploaded_image = await read_upload_file_bytes(image)
+            await service.add_target_image(target.id, uploaded_image, is_primary=True)
+        except Exception:
+            await db.delete(target)
+            await db.commit()
+            raise
+
+    # Fetch final state with eager loading
+    from sqlalchemy import select
+    from sqlalchemy.orm import selectinload
+    from app.models.face import FaceTargetImage, FaceEmbedding
+    from app.models.media import MediaAsset
+    
+    await db.refresh(target)
+    img_res = await db.execute(
+        select(FaceTargetImage)
+        .options(selectinload(FaceTargetImage.media_asset))
+        .where(FaceTargetImage.target_id == target.id)
+    )
+    images = img_res.scalars().all()
+    
+    emb_res = await db.execute(select(FaceEmbedding).where(FaceEmbedding.target_id == target.id))
+    embedding = emb_res.scalars().first()
+    
+    image_paths = [img.media_asset.secure_url or img.media_asset.local_url for img in images if img.media_asset]
+    embedding_path = str(embedding.id) if embedding else None
+    
+    if image and (not image_paths or not embedding_path):
+        await db.delete(target)
+        await db.commit()
+        raise HTTPException(status_code=500, detail="FACE_TARGET_ENROLLMENT_INCOMPLETE")
     
     return FaceTargetSchema(
         target_person_id=str(target.id),
         display_name=target.display_name,
         created_at_ms=int(target.created_at.timestamp() * 1000),
-        notes=target.notes
+        notes=target.notes,
+        image_paths=image_paths,
+        embedding_path=embedding_path
     )
 
 @router.get("/targets", response_model=List[FaceTargetSchema])
@@ -135,6 +169,6 @@ async def verify_face_direct(
     if not face_recognition_service.is_ready():
         raise HTTPException(status_code=503, detail="Face recognition provider not ready")
 
-    image_bytes = await file.read()
-    result = await face_recognition_service.verify_frame_direct(image_bytes)
+    uploaded_image = await read_upload_file_bytes(file)
+    result = await face_recognition_service.verify_frame_direct(uploaded_image.content)
     return result

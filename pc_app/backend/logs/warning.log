@@ -1,0 +1,5 @@
+2026-06-06 02:01:00,579 - cloudinary_media_service - WARNING - Cloudinary upload failed: Invalid cloud_name smart_car. Falling back to local.
+2026-06-06 02:04:05,827 - cloudinary_media_service - WARNING - Cloudinary upload failed: Invalid cloud_name smart_car. Falling back to local.
+2026-06-06 02:07:37,270 - cloudinary_media_service - WARNING - Cloudinary upload failed: Invalid cloud_name smart_car. Falling back to local.
+2026-06-06 02:13:13,399 - cloudinary_media_service - WARNING - Cloudinary upload failed: Invalid cloud_name smart_car. Falling back to local.
+2026-06-06 02:17:01,552 - cloudinary_media_service - WARNING - Cloudinary upload failed: Invalid cloud_name smart_car. Falling back to local.
