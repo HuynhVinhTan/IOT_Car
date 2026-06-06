@@ -18,6 +18,8 @@ export function RemoteControlPanel() {
   const [activeMapId, setActiveMapId] = useState<string | null>(null);
   const [autonomousError, setAutonomousError] = useState<string | null>(null);
   const [commandError, setCommandError] = useState<string | null>(null);
+  const [lastCommand, setLastCommand] = useState<string>("None");
+  const [lastResponse, setLastResponse] = useState<string>("None");
   const intervalRef = useRef<number | null>(null);
 
   const fetchStatus = useCallback(async () => {
@@ -58,17 +60,25 @@ export function RemoteControlPanel() {
   };
 
   const sendDrive = useCallback(async (left: number, right: number) => {
+    const cmd = {
+      command: "REMOTE_DRIVE",
+      left_motor_speed: left,
+      right_motor_speed: right,
+    };
+    console.log("[RemoteControl] Sending command:", cmd);
+    setLastCommand(JSON.stringify(cmd));
+
     try {
-      const res = await sendCarCommand({
-        command: "REMOTE_DRIVE",
-        left_motor_speed: left,
-        right_motor_speed: right,
-      });
+      const res = await sendCarCommand(cmd);
+      console.log("[RemoteControl] Response:", res);
+      setLastResponse(JSON.stringify(res));
+
       if (res && res.ok === false)
         setCommandError("Command failed: " + (res.detail || "Unknown error"));
       else setCommandError(null);
     } catch (e: any) {
       console.error("Drive command failed:", e);
+      setLastResponse(`Error: ${e.message}`);
       setCommandError(e.message || "Failed to send command");
     }
   }, []);
@@ -78,13 +88,21 @@ export function RemoteControlPanel() {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
+    const cmd = { command: "REMOTE_STOP" };
+    console.log("[RemoteControl] Sending command:", cmd);
+    setLastCommand(JSON.stringify(cmd));
+
     try {
-      const res = await sendCarCommand({ command: "REMOTE_STOP" });
+      const res = await sendCarCommand(cmd);
+      console.log("[RemoteControl] Response:", res);
+      setLastResponse(JSON.stringify(res));
+
       if (res && res.ok === false)
         setCommandError("Command failed: " + (res.detail || "Unknown error"));
       else setCommandError(null);
     } catch (e: any) {
       console.error("Stop command failed:", e);
+      setLastResponse(`Error: ${e.message}`);
       setCommandError(e.message || "Failed to stop");
     }
   }, []);
@@ -238,7 +256,9 @@ export function RemoteControlPanel() {
 
   const isConnected = carStatus?.connected === true;
   const isManualMode = carStatus?.mode === "MANUAL_REMOTE";
-  const canControl = isConnected && isManualMode;
+  // Allow control if connected, regardless of mode (manual/remote/server_control)
+  // The backend will handle mode validation if necessary.
+  const canControl = isConnected;
 
   return (
     <Card title="Remote Control">
@@ -246,15 +266,43 @@ export function RemoteControlPanel() {
         {/* Status Box */}
         <div className="remote-status-box">
           <div className="remote-status-label">
-            Status:{" "}
-            <span className={isConnected ? "remote-status-connected" : "remote-status-offline"}>
-              {isConnected ? "Connected" : "Offline"}
+            Backend:{" "}
+            <span
+              className={
+                isConnected
+                  ? "remote-status-connected"
+                  : "remote-status-offline"
+              }
+            >
+              {isConnected ? "Online" : "Offline"}
+            </span>
+          </div>
+          <div className="remote-status-label">
+            Car:{" "}
+            <span
+              className={
+                carStatus?.connected
+                  ? "remote-status-connected"
+                  : "remote-status-offline"
+              }
+            >
+              {carStatus?.connected ? "Connected" : "Disconnected"}
+            </span>
+          </div>
+          <div className="remote-status-label">
+            Mode:{" "}
+            <span className="remote-status-mode">
+              {carStatus?.mode || "UNKNOWN"}
             </span>
           </div>
           {carStatus && (
             <div>
-              <div className="remote-status-item">Car ID: {carStatus.car_id || "N/A"}</div>
-              <div className="remote-status-item">Mode: {carStatus.mode || "Unknown"}</div>
+              <div className="remote-status-item">
+                Car ID: {carStatus.car_id || "N/A"}
+              </div>
+              <div className="remote-status-item">
+                Mode: {carStatus.mode || "Unknown"}
+              </div>
               <div className="remote-status-item">
                 Last seen:{" "}
                 {carStatus.last_seen_ms
@@ -273,14 +321,21 @@ export function RemoteControlPanel() {
               )}
               {(carStatus.latest_telemetry?.obstacle_front ||
                 carStatus.latest_telemetry?.forward_unsafe) && (
-                <div className="remote-status-item remote-status-warning" style={{ fontWeight: "bold" }}>
+                <div
+                  className="remote-status-item remote-status-warning"
+                  style={{ fontWeight: "bold" }}
+                >
                   ⚠️ Obstacle Front!
                 </div>
               )}
             </div>
           )}
-          {statusError && <div className="remote-status-error">{statusError}</div>}
-          {commandError && <div className="remote-status-error">{commandError}</div>}
+          {statusError && (
+            <div className="remote-status-error">{statusError}</div>
+          )}
+          {commandError && (
+            <div className="remote-status-error">{commandError}</div>
+          )}
         </div>
 
         {/* Button Group */}
@@ -312,7 +367,9 @@ export function RemoteControlPanel() {
         </div>
 
         {/* Error Messages */}
-        {autonomousError && <div className="remote-error-message">{autonomousError}</div>}
+        {autonomousError && (
+          <div className="remote-error-message">{autonomousError}</div>
+        )}
 
         {!canControl && (
           <div className="remote-control-disabled">
@@ -332,7 +389,9 @@ export function RemoteControlPanel() {
                 ✓ {maps.find((m) => m.id === activeMapId)?.name || activeMapId}
               </span>
             ) : (
-              <span className="remote-autonomous-inactive">No active map selected</span>
+              <span className="remote-autonomous-inactive">
+                No active map selected
+              </span>
             )}
           </div>
           <div className="remote-autonomous-item">
@@ -370,6 +429,28 @@ export function RemoteControlPanel() {
             >
               Activate
             </button>
+          </div>
+        </div>
+
+        {/* Debug Info */}
+        <div
+          className="remote-debug-info"
+          style={{
+            fontSize: "11px",
+            fontFamily: "monospace",
+            backgroundColor: "#f5f5f5",
+            padding: "8px",
+            borderRadius: "4px",
+            marginBottom: "12px",
+            border: "1px solid #ddd",
+            color: "#666",
+          }}
+        >
+          <div style={{ marginBottom: "4px" }}>
+            <strong>Last Command:</strong> {lastCommand}
+          </div>
+          <div>
+            <strong>Last Response:</strong> {lastResponse}
           </div>
         </div>
 

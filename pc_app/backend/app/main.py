@@ -6,6 +6,9 @@ from typing import Any
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
+print("BOOT_MARKER_LAZY_FACE_FIX_2026_06_06_V4")
+
+import os
 from app.api.routes import (
     ai,
     auto,
@@ -13,7 +16,6 @@ from app.api.routes import (
     camera_ws,
     car,
     detection,
-    faces,
     health,
     map,
     mission,
@@ -23,6 +25,10 @@ from app.api.routes import (
     route_segments,
     telemetry,
 )
+
+ENABLE_FACE_API = os.getenv("ENABLE_FACE_API", "false").lower() == "true"
+if ENABLE_FACE_API:
+    from app.api.routes import faces
 from app.core.config import settings
 from app.core.loggers import logger
 from app.core.database import AsyncSessionLocal
@@ -134,18 +140,13 @@ async def remote_safety_watchdog() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    # 1. Initialize Face Recognition
-    try:
-        logger.info("Initializing Face Recognition Service...")
-        await face_recognition_service.initialize()
-        logger.info("Face Recognition Service initialized.")
-    except Exception:
-        logger.exception("Error initializing Face Recognition Service")
+    # 1. Initialize Face Recognition (Lazy load, no-op here)
+    await face_recognition_service.initialize()
 
-    # 2. Build Face Recognition Cache
+    # 2. Build Face Recognition Cache (Metadata only, no model load)
     try:
         async with AsyncSessionLocal() as session:
-            logger.info("Building face recognition cache...")
+            logger.info("Building face recognition cache (metadata only)...")
             await face_recognition_service.build_cache(session)
             logger.info("Face recognition cache built successfully.")
     except Exception:
@@ -290,7 +291,8 @@ app.include_router(path_record.router)
 app.include_router(auto.router)
 app.include_router(route_segments.router)
 app.include_router(ai.router)
-app.include_router(faces.router)
+if ENABLE_FACE_API:
+    app.include_router(faces.router)
 app.include_router(robot.router)
 
 

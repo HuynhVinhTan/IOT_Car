@@ -23,7 +23,7 @@ async def test_upload_empty_file():
     
     with pytest.raises(HTTPException) as exc:
         await read_upload_file_bytes(upload)
-    assert exc.value.status_code == 400
+    assert exc.value.status_code == 422
     assert "empty" in exc.value.detail.lower()
 
 @pytest.mark.asyncio

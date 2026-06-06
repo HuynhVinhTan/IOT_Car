@@ -8,7 +8,6 @@ if TYPE_CHECKING:
 
 import logging
 from datetime import datetime
-from insightface.app import FaceAnalysis
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +21,13 @@ class FaceRecognitionService:
         self._provider = "CPUExecutionProvider"
         self._initialized_at = None
 
-    async def initialize(self) -> None:
-        try:
-            logger.info("Initializing FaceRecognitionService...")
+    def _get_app(self):
+        if self._model is None:
+            import traceback
+            stack = traceback.format_stack()
+            logger.info(f"Lazy-loading FaceAnalysis model... Caller stack:\n{''.join(stack)}")
+            
+            from insightface.app import FaceAnalysis
             self._model = FaceAnalysis(
                 name=self._model_name,
                 providers=[self._provider],
@@ -32,11 +35,13 @@ class FaceRecognitionService:
             self._model.prepare(ctx_id=-1, det_size=(640, 640))
             self._ready = True
             self._initialized_at = datetime.now()
-            logger.info("FaceRecognitionService initialized successfully.")
-        except Exception as e:
-            self._last_error = str(e)
-            logger.error(f"Failed to initialize FaceRecognitionService: {e}")
-            self._ready = False
+            logger.info("FaceAnalysis model loaded successfully.")
+        return self._model
+
+    async def initialize(self) -> None:
+        # No-op for lazy loading, model will be loaded on first use
+        logger.info("FaceRecognitionService ready for lazy loading.")
+        self._ready = True
 
     def get_status(self) -> dict:
         return {
@@ -67,6 +72,7 @@ class FaceRecognitionService:
                 message="Person candidate is too far or small for face recognition"
             )
 
+        app = self._get_app()
         return FaceRecognitionResult(
             status="PROVIDER_NOT_READY",
             message="Face recognition provider is not implemented"
@@ -76,7 +82,17 @@ class FaceRecognitionService:
         # Backward compatibility or direct frame scan (not recommended for robot)
         if not self._ready:
             return {"status": "PROVIDER_NOT_READY"}
+        app = self._get_app()
         return {"status": "UNKNOWN_PERSON"}
+
+    def _decode_image_bytes(self, image_bytes: bytes):
+        import cv2
+        import numpy as np
+        np_arr = np.frombuffer(image_bytes, np.uint8)
+        image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        if image is None:
+            raise ValueError("Invalid image file. Could not decode uploaded image.")
+        return image
 
     async def enroll_target(self, frame_data: bytes) -> Any:
         """
@@ -85,7 +101,45 @@ class FaceRecognitionService:
         """
         if not self._ready:
             return None
-        return None
+
+        import asyncio
+        app = await asyncio.to_thread(self._get_app)
+        
+        try:
+            img = await asyncio.to_thread(self._decode_image_bytes, frame_data)
+        except ValueError as e:
+            logger.error(f"Failed to decode image: {e}")
+            raise e
+            
+        logger.info("face enroll decoded image shape=%s", img.shape)
+        
+        # Try detection with default 640x640 det_size
+        faces = await asyncio.to_thread(app.get, img)
+        logger.info("face enroll detected face_count=%s", len(faces))
+        if len(faces) > 0:
+            main_face = faces[0]
+            logger.info("face bbox=%s score=%s", getattr(main_face, "bbox", None), getattr(main_face, "det_score", None))
+        
+        if len(faces) == 0:
+            # Try 320x320
+            logger.info("Retrying with det_size=(320, 320)")
+            await asyncio.to_thread(app.prepare, ctx_id=-1, det_size=(320, 320))
+            faces = await asyncio.to_thread(app.get, img)
+            logger.info("face enroll detected face_count=%s", len(faces))
+            if len(faces) > 0:
+                main_face = faces[0]
+                logger.info("face bbox=%s score=%s", getattr(main_face, "bbox", None), getattr(main_face, "det_score", None))
+            # Restore 640x640 for normal operation
+            await asyncio.to_thread(app.prepare, ctx_id=-1, det_size=(640, 640))
+        
+        if len(faces) == 0:
+            return None
+            
+        # Get the largest face
+        faces = sorted(faces, key=lambda x: (x.bbox[2] - x.bbox[0]) * (x.bbox[3] - x.bbox[1]), reverse=True)
+        main_face = faces[0]
+        
+        return main_face.embedding
 
     async def build_cache(self, db: Any) -> None:
         """

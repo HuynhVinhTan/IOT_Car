@@ -141,34 +141,57 @@ async def load_map(request: Request, body: LoadMapRequest) -> dict:
 
 @router.post("/command")
 async def send_command(request: Request, command: CarCommand) -> dict:
+    from app.core.loggers import logger
+    
     telemetry_service = request.app.state.telemetry_service
     settings = request.app.state.settings
     
-    # Check if car is connected
-    if not telemetry_service.car_connected(settings.car_offline_timeout_seconds):
-        return {"ok": False, "reason": "car_controller_not_connected"}
-        
-    # Check mode
+    # Get car info for logging
     latest = telemetry_service.latest_car_telemetry
     mode = latest.get("mode") if latest else "IDLE"
+    car_id = getattr(settings, "car_controller_id", "car_controller_01")
+    connected = telemetry_service.car_connected(settings.car_offline_timeout_seconds)
     
     payload = command.to_payload()
     cmd_type = payload.get("command")
     
+    # Log the request
+    logger.info(
+        "remote control request: command=%s car_id=%s mode=%s connected=%s",
+        cmd_type,
+        car_id,
+        mode,
+        connected,
+    )
+    
+    # Check if car is connected
+    if not connected:
+        return {
+            "ok": False,
+            "reason": "car_controller_not_connected",
+            "command": cmd_type,
+            "car_id": car_id,
+            "sent_to_car": False
+        }
+         
+    # Check mode (only for non-stop commands)
     if cmd_type != "REMOTE_STOP" and mode not in ["MANUAL_REMOTE", "SERVER_CONTROL"]:
         return {
             "ok": False, 
             "reason": "car_not_in_server_control_mode",
-            "current_mode": mode
+            "current_mode": mode,
+            "command": cmd_type,
+            "car_id": car_id,
+            "sent_to_car": False
         }
-        
+         
     # Validate speeds
     if cmd_type == "REMOTE_DRIVE":
         left = payload.get("left_motor_speed", 0)
         right = payload.get("right_motor_speed", 0)
         if not (-255 <= left <= 255 and -255 <= right <= 255):
             return {"ok": False, "reason": "speed_out_of_range"}
-    
+     
     # Map to firmware schema
     if cmd_type == "REMOTE_STOP":
         firmware_payload = {"type": "REMOTE_STOP", "source": "backend_api"}
@@ -181,8 +204,25 @@ async def send_command(request: Request, command: CarCommand) -> dict:
         }
     else:
         firmware_payload = {"type": cmd_type, "source": "backend_api"}
-            
-    return await send_command_to_car(request, firmware_payload)
+        
+    result = await send_command_to_car(request, firmware_payload)
+    
+    # Format response to match requirements
+    if result.get("ok"):
+        return {
+            "ok": True,
+            "command": cmd_type,
+            "car_id": car_id,
+            "sent_to_car": True
+        }
+    else:
+        return {
+            "ok": False,
+            "reason": result.get("reason", "unknown_error"),
+            "command": cmd_type,
+            "car_id": car_id,
+            "sent_to_car": False
+        }
 
 
 @router.post("/mode")

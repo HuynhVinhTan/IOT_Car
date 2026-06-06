@@ -27,8 +27,8 @@ async def read_upload_file_bytes(
     
     if size == 0:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="File is empty"
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Uploaded image is empty."
         )
         
     if size > max_bytes:

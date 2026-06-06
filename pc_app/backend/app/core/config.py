@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     car_offline_timeout_seconds: float = Field(default=2.0, validation_alias="CAR_OFFLINE_TIMEOUT_SECONDS")
     robot_telemetry_stale_ms: int = Field(default=1500, validation_alias="ROBOT_TELEMETRY_STALE_MS")
     stop_on_person_detected: bool = Field(default=False, validation_alias="STOP_ON_PERSON_DETECTED")
+    enable_person_detection: bool = Field(default=True, validation_alias="ENABLE_PERSON_DETECTED")
     enable_joystick_audio_alert: bool = Field(default=True, validation_alias="ENABLE_JOYSTICK_AUDIO_ALERT")
     auto_stop_car_on_person_detected: bool = Field(default=False, validation_alias="AUTO_STOP_CAR_ON_PERSON_DETECTED")
     remote_short_press_mode_policy: str = Field(default="cycle_safe_modes", validation_alias="REMOTE_SHORT_PRESS_MODE_POLICY")

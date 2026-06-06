@@ -92,8 +92,9 @@ class FaceRegistryService:
             }
         except ValueError as e:
             await self.db.rollback()
-            logger.warning(f"Enrollment validation failed: {e}")
-            raise HTTPException(status_code=400, detail=str(e))
+            logger.warning(f"Enrollment validation failed for {uploaded_image.filename}: {e}")
+            logger.debug(f"Details: filename={uploaded_image.filename}, content_type={uploaded_image.content_type}, size={uploaded_image.size}, asset_id={asset.id if 'asset' in locals() else None}")
+            raise HTTPException(status_code=422, detail="No face detected. Please upload a clear frontal face image.")
         except Exception as e:
             await self.db.rollback()
             logger.error(f"Embedding/DB save failed: {e}", exc_info=True)

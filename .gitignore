@@ -24,3 +24,4 @@ migrations/
 # Runtime logs
 pc_app/backend/logs/*.log
 !pc_app/backend/logs/.gitkeep
+scripts/
